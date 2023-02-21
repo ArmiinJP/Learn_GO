@@ -42,10 +42,10 @@ func (c Clock) Subtract(m int) Clock {
 }
 
 func (c Clock) String() string {
-	return fmt.Sprintf("%02d:%02d", c.Hour, c.Min)
+	return fmt.Sprintf("%002d:%02d", c.Hour, c.Min)
 }
 
 func main(){
-	//a := New(23, 58)
-	fmt.Println(-1536%1440)
+	a := New(23, 58)
+	fmt.Println(a.String())
 }
