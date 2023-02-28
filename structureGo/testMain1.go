@@ -1,6 +1,6 @@
 package main
 
-import a "hasan/testSubdir"
+import a "structureGo/testSubdir"
 import "fmt"
 func main(){
 	fmt.Println(a.Te())
