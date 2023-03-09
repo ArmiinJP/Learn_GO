@@ -31,15 +31,40 @@ type Category struct {
 	UserID int
 }
 
-var Users []User
-var Tasks []Task
-var Categoreis []Category
-var authenticatedUser *User
+var (
+	Users []User
+	Tasks []Task
+	Categoreis []Category
+
+	authenticatedUser *User
+)
 
 func LoginUser() {
-	var newUser User
 	//var isEmpty int
 	fmt.Println("\n----- Logging User ----- ")
+	var newUser User
+	var userInput string
+
+	if authenticatedUser != nil {
+		fmt.Printf("User %s is now logged in\nIs User Logged out?(Y/N): ", authenticatedUser.Email)
+		fmt.Scanln(&userInput)
+		
+		switch userInput{
+		case "y", "Y", "yes", "Yes", "YES":
+			fmt.Printf("User %s Is Successfully Logged out\n\n", authenticatedUser.Email)
+			authenticatedUser = nil
+		case "n", "N", "no", "NO", "No":
+			fmt.Printf("Login new User Stop, User %s still Logged in\n", authenticatedUser.Email)
+
+			return
+
+		default:
+			fmt.Println("your Input is False")
+			
+			return
+		}
+	}
+
 
 	fmt.Printf("Please enter your Email: ")
 	fmt.Scanln(&newUser.Email)
@@ -161,7 +186,7 @@ func EditCategory(){}
 func RunCommand(userCommand string){
 
 	//service need logging before use, except exit & register-user
-	if userCommand != "exit" && userCommand != "register-user" && authenticatedUser == nil{
+	if userCommand != "exit" && userCommand != "register-user" && userCommand != "" && authenticatedUser == nil {
 		LoginUser()
 		if authenticatedUser == nil {
 
@@ -194,38 +219,45 @@ func RunCommand(userCommand string){
 			LoginUser()
 		case "whoami":
 			fmt.Printf("\n you're ID is: %d, and you're Email is: %s\n", authenticatedUser.ID, authenticatedUser.Email)
-		case "empty":
+		case "":
 			fmt.Printf("\n--- command not input!!\n")
 		case "exit":
+			fmt.Println("App is Closed")
 			os.Exit(0)					
 		default:
 			fmt.Printf("\n--- command %s is not found!!\n", userCommand)
 	}
 }
+func giveUserCommand(userFlag string) string{
+	var userCommand string
+	if userFlag == ""{
+		if authenticatedUser == nil{
+			fmt.Println("\n-----------------------User not Login the APP-----------------------")
+			fmt.Println("--> Accessable Command After Succseefull Login is:\n01. |create-task|", "\t02. |list-task|", "\t03. |list-today-task|", "\t04. |list-day-task|", "\t05. |edit-task|",
+						"\n06. |task-complete|", "\t07. |create-category|", "\t08. |list-category|", "\t09. |edit-category|", "\t10. |whoami|", "\n11. |login|", "\t\t12. |register-user|", "\t13. |exit|")
+			fmt.Println("\n--> Accessable Command without login is:\n12. |register-user|", "\t13. |exit|")
+		} else {
+			fmt.Println("\n---------------------------User Logged in---------------------------")
+			fmt.Println("--> Accessable Command is:\n01. |create-task|", "\t02. |list-task|", "\t03. |list-today-task|", "\t04. |list-day-task|", "\t05. |edit-task|",
+						"\n06. |task-complete|", "\t07. |create-category|", "\t08. |list-category|", "\t09. |edit-category|", "\t10. |whoami|", "\n11. |login|", "\t\t12. |register-user|", "\t13. |exit|")		}
+
+		fmt.Print("\nPlease enter your command: ")
+		fmt.Scanln(&userCommand)
+	} else{
+		userCommand = userFlag
+	}
+	
+	return userCommand
+}
 func main() {
-	//fmt.Println("test")
-	userCommandflag := flag.String("command", "empty", "enter your command")
+	fmt.Println("Welcome toDo App")
+	userCommandflag := flag.String("command", "", "enter your command")
 	flag.Parse()
 
-	// if flag command not input, ask from user to input command
-	for *userCommandflag == "empty"{
-		fmt.Print("Please enter your command: ")
-		isEmpty, _ := fmt.Scanln(userCommandflag)
-		if isEmpty == 0 {
-			*userCommandflag = "empty"
-		}
-	}
-
-	// loop{} to run app when user input "exit" command
 	userCommand := *userCommandflag
 	for {
+		userCommand = giveUserCommand(userCommand)
 		RunCommand(userCommand)
-
-		//get new command from user
-		fmt.Print("\nPlease enter your command: ")
-		isEmpty, _ := fmt.Scanln(&userCommand)
-		if isEmpty == 0 {
-			userCommand = "empty"
-		}
+		userCommand = ""		
 	}
 }

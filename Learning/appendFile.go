@@ -1,3 +1,4 @@
+//Source: https://www.educative.io/answers/how-to-append-to-a-file-in-golang
 //Appending to file if exist, Create a file in non exist
 
 /*
