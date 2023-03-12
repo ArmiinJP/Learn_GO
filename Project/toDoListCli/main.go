@@ -1,10 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
+	"bufio"
+
 	//"errors"
 	//"log"
 )
@@ -37,6 +42,8 @@ var (
 	Categoreis []Category
 
 	authenticatedUser *User
+
+	usersFileFormat string
 )
 
 func LoginUser() {
@@ -99,8 +106,64 @@ func RegisterUser() {
 	//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
 
 	newUser.ID = len(Users) + 1
+
+	err := saveToFile(newUser)
+	if err != nil{
+		return
+	}
 	Users = append(Users, newUser)
-	fmt.Printf("\nUser with Email: %s\n---> Successfull Registerd\n", newUser.Email)
+	fmt.Printf("\nUser with Email: %s\n---> Successfull Registerd\n", newUser.Email)	
+}
+func saveToFile(newUser User) error{
+	//Choose format to save into file
+	var data []byte
+	var err error
+	var nameFile string
+
+	switch usersFileFormat {
+	case "json":
+		nameFile = "data.json"
+		data, err = json.Marshal(&newUser)
+		if err != nil {
+
+			return fmt.Errorf("Could not convert data to json\n")
+		}		
+
+	case "xml":
+		nameFile = "data.xml"
+		data, err = xml.Marshal(&newUser)
+		if err != nil {
+
+			return fmt.Errorf("Could not convert data to xml\n")
+		}
+
+	case "csv":
+		nameFile = "data.csv"
+		data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.ID, newUser.Password))
+	
+	default:
+
+		return fmt.Errorf("format to save file is invalid\n")
+	}
+
+	//write data to the file
+    file,err := os.OpenFile(nameFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    
+    if err != nil {
+    	
+		return fmt.Errorf("Could not open dataset\n")
+	}
+
+	defer file.Close()
+	 
+	_, err2 := file.WriteString(string(data)+"\n")
+
+	if err2 != nil {
+
+		return fmt.Errorf("Could not write data to dataset\n")
+	}
+
+	return nil
 }
 func CreateTask(){
 	var newTask Task
@@ -176,13 +239,12 @@ func ListCategory(){
 	for _, v := range Categoreis{
 		if v.UserID == authenticatedUser.ID {
 			fmt.Println("Category name is:", v.Title,
-						"Category ID is:", v.ID,
+						"\nCategory ID is:", v.ID,
 						"\nCategory Color is:", v.Color)
 		}
 	}
 }
 func EditCategory(){}
-
 func RunCommand(userCommand string){
 
 	//service need logging before use, except exit & register-user
@@ -246,18 +308,103 @@ func giveUserCommand(userFlag string) string{
 	} else{
 		userCommand = userFlag
 	}
-	
+
 	return userCommand
+}
+func checkFormatFile(userFormatFlag string) string{
+	//datase --> if exist 	  : return name dataset and set usersFileFormat to format dataset
+	//		 	 if not exist : return "" and set usersFileFormat to user flag format or default format(json)
+	var fileFormats = []string{"data.csv", "data.json", "data.xml"}
+	var err error
+	var fileDatasetName string
+
+	for _, v := range fileFormats{
+		_ , err = os.Stat(v)
+		if !os.IsNotExist(err) {
+			fileDatasetName = v
+			break
+		}
+	}
+
+	if fileDatasetName == ""{
+		usersFileFormat = strings.ToLower(userFormatFlag)
+		if usersFileFormat == ""{
+			fmt.Println("Format not Determine\n so default format (json) is apply")
+			usersFileFormat = "json"
+		} else if !(usersFileFormat == "json" || userFormatFlag == "xml" || userFormatFlag == "csv"){
+			fmt.Println("Format File you choose is False\n so default format (json) is apply")
+			usersFileFormat = "json"
+		} 
+
+		return ""
+
+	} else {
+		usersFileFormat = strings.Split(fileDatasetName, ".")[1]
+		fmt.Printf("file with format %s is Exist!\nso Data is save with format: | %s |\n",
+					 fileDatasetName,strings.ToUpper(strings.Split(fileDatasetName, ".")[1]))
+		
+		return fileDatasetName
+	}
+}
+func readDataset(datasetName string) error{
+    // open file
+    f, err := os.Open(datasetName)
+    if err != nil {
+        return fmt.Errorf("error when open Dataset\n")
+    }
+    defer f.Close()
+
+	var data string
+	var fetchUser User
+    scanner := bufio.NewScanner(f)
+    
+	for scanner.Scan() {
+		var err error
+        data = strings.Split(scanner.Text(), "\n")[0]
+		switch usersFileFormat {
+		case "json": 
+			err = json.Unmarshal([]byte(data), &fetchUser)
+			if err != nil{
+
+				return fmt.Errorf("datas in dataset is wrong format for JSON")
+			}
+		case "xml":
+			err = xml.Unmarshal([]byte(data), &fetchUser)
+			if err != nil{
+
+				return fmt.Errorf("datas in dataset is wrong format for JSON")
+			}			
+		case "csv":
+			fetchUser.Email = strings.Split(data, ",")[0]
+			fetchUser.ID, err = strconv.Atoi(strings.Split(data, ",")[1])
+			if err != nil{
+
+				return fmt.Errorf("datas in dataset is wrong format for CSV")
+			}
+			fetchUser.Password = strings.Split(data, ",")[2]
+		}
+
+		Users = append(Users, fetchUser)
+    }
+
+	return nil
 }
 func main() {
 	fmt.Println("Welcome toDo App")
 	userCommandflag := flag.String("command", "", "enter your command")
+	userFormatFlag := flag.String("format", "", "enter your format to save file")
 	flag.Parse()
 
+	datasetNameExist := checkFormatFile(*userFormatFlag)
+	if datasetNameExist != "" {
+		readDataset(datasetNameExist)
+
+	}
 	userCommand := *userCommandflag
+
 	for {
 		userCommand = giveUserCommand(userCommand)
 		RunCommand(userCommand)
-		userCommand = ""		
+		userCommand = ""
 	}
 }
