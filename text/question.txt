@@ -1,0 +1,93 @@
+
+Enable dependency tracking for your code
+Go, VSC, Analysis Line Randombullshitgo and xcode, and GOMOD ffs.
+
+anotation verbs
+escape or special   
+انواع go env 
+...any
+
+generic چیه
+
+بحث error handling 
+
+(اینکه چطوری چند تا فایل go داخل یک پوشه که همه جز یک پکیج هستند همدیگه را میبینن یا اصن شدنی هست یا نه را نمیدونم، انگار غیر از مسیر اصلی تو بقیه دایرکتوری ها اوکی هست و بدون هیچ پسوند پیشوندی تمامی فایلهای داخل یک پکیج میتونن متغیر و توابع همو ببینن، اما واسه دایرکتوری اصلی که پکیج main هست انگار نمیشه.
+
+
+reserved word in go
+
+جمع‌بندی کار با فایل، التبه تو توضیحات یک سری لینک و اینا گذاشتم اما روش بهینه؟
+
+ما یه Println داریم، که میاد مقادیر و نشون میده اخر کار هم خودش یه n\ میزاره تهه کار.
+یدونه هم Printf داریم، که میاد یه جورایی کار string formating را انجام میده یعنی T% و نمیاد همینا بزاره میاد مثلا تایپ اونو میزاره و با v% هم مقدارشو میزاره که برای استرینگ هم q% هست.
+کلا این درصدها چیاست و چطورین.
+
+عکسه که فرستادم برای این چاپه چیه جریانش؟
+
+
+
+عجیب : 
+https://go.dev/tour/flowcontrol/8
+
+debag mode
+attaching debuager
+کلا دیباگ کردن 
+
+for index, value := range a {
+	fmt.Println(index, value)
+}
+
+escape sequence
+
+ماژول های:
+bytes , bytes buffer 
+unicode , unicode.Isletter
+
+پرفورمنس داده‌ساختارها
+
+ترتیب فانکشن‌هایی که تعریف میکنیم قبل وبعد main به چه صورت هست؟
+
+fmt.Fprintf چیه
+
+package internal
+تفاوت Functions as values و Function literals
+
+این iota را فهمیدم ولی این که دقیقا تو تمرین Triangle چی شد را بگو
+https://splice.com/blog/iota-elegant-constants-golang/
+
+این  return خالی با os.Exit(0) چه فرقی داره، هر دو یعنی برنامه موفق بوده و باید بسته بشند؟
+کدهای استاتوس os.Exit بقیشون چیا هستند و چه معنی دارند، ایا میشه return کرد و نشون داد که برنامه خطا داشته ؟
+فرق اینکه مثلا از error.New استفاده کنیم، با اینکه یه پیغام خطا بدیم و مثلا برنامه را ببندیم چیه
+کلا مبحث خطا برگردوندن و کنترلش 
+
+کانونشن گولنگ
+
+data = append(data, []byte("\n")...)
+
+قابلیت رفلکت reflect
+
+
+
+خیلی جذابه که scanln با این اوکیه: و من نمیدونم چرا
+var tmpCategoryid int
+fmt.Scanln(&tmpCategoryid)
+ با این حال من کردمش این:
+var tmpCategoryidStr string
+fmt.Scanln(&tmpCategoryidStr)
+tmpCategoryidInt, err := strconv.Atoi(tmpCategoryidStr)
+if err != nil{
+	fmt.Printf("")
+	continue
+
+این بحث حلقه زدن بهینه
+
+------------------- اما searching
+dgraph memory c package
+
+تفاوت seralizitain و encoding 
+انواع hashing
+خب بحث hashing password
+انواع serializtion
+خب golang sdk 
+
+

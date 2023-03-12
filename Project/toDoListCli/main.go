@@ -114,57 +114,7 @@ func RegisterUser() {
 	Users = append(Users, newUser)
 	fmt.Printf("\nUser with Email: %s\n---> Successfull Registerd\n", newUser.Email)	
 }
-func saveToFile(newUser User) error{
-	//Choose format to save into file
-	var data []byte
-	var err error
-	var nameFile string
 
-	switch usersFileFormat {
-	case "json":
-		nameFile = "data.json"
-		data, err = json.Marshal(&newUser)
-		if err != nil {
-
-			return fmt.Errorf("Could not convert data to json\n")
-		}		
-
-	case "xml":
-		nameFile = "data.xml"
-		data, err = xml.Marshal(&newUser)
-		if err != nil {
-
-			return fmt.Errorf("Could not convert data to xml\n")
-		}
-
-	case "csv":
-		nameFile = "data.csv"
-		data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.ID, newUser.Password))
-	
-	default:
-
-		return fmt.Errorf("format to save file is invalid\n")
-	}
-
-	//write data to the file
-    file,err := os.OpenFile(nameFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-    
-    if err != nil {
-    	
-		return fmt.Errorf("Could not open dataset\n")
-	}
-
-	defer file.Close()
-	 
-	_, err2 := file.WriteString(string(data)+"\n")
-
-	if err2 != nil {
-
-		return fmt.Errorf("Could not write data to dataset\n")
-	}
-
-	return nil
-}
 func CreateTask(){
 	var newTask Task
 	fmt.Println("\n---- Creating Task")
@@ -389,6 +339,57 @@ func readDataset(datasetName string) error{
 
 	return nil
 }
+func saveToFile(newUser User) error{
+	//Choose format to save into file
+	var data []byte
+	var err error
+	var nameFile string
+
+	switch usersFileFormat {
+	case "json":
+		nameFile = "data.json"
+		data, err = json.Marshal(&newUser)
+		if err != nil {
+
+			return fmt.Errorf("Could not convert data to json\n")
+		}		
+
+	case "xml":
+		nameFile = "data.xml"
+		data, err = xml.Marshal(&newUser)
+		if err != nil {
+
+			return fmt.Errorf("Could not convert data to xml\n")
+		}
+
+	case "csv":
+		nameFile = "data.csv"
+		data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.ID, newUser.Password))
+	
+	default:
+
+		return fmt.Errorf("format to save file is invalid\n")
+	}
+
+	//write data to the file
+    file,err := os.OpenFile(nameFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    
+    if err != nil {
+    	
+		return fmt.Errorf("Could not open dataset\n")
+	}
+
+	defer file.Close()
+	 
+	_, err2 := file.WriteString(string(data)+"\n")
+
+	if err2 != nil {
+
+		return fmt.Errorf("Could not write data to dataset\n")
+	}
+
+	return nil
+}
 func main() {
 	fmt.Println("Welcome toDo App")
 	userCommandflag := flag.String("command", "", "enter your command")
@@ -396,10 +397,12 @@ func main() {
 	flag.Parse()
 
 	datasetNameExist := checkFormatFile(*userFormatFlag)
+
+	// reading dataset if dataset exist
 	if datasetNameExist != "" {
 		readDataset(datasetNameExist)
-
 	}
+	
 	userCommand := *userCommandflag
 
 	for {
