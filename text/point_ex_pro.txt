@@ -41,5 +41,5 @@ if _, err := strconv.Atoi(ye_string); err == nil {
 fmt.Sprintf("%02d:%02d", c.Hour, c.Min)
 اگر 3 بشه مینویسه 03 اگر 23 باشه همونو مینویسه
 -------------------
-
-
+چطور ببینیم یک فایل وجود داره یا نه
+https://www.educative.io/answers/how-to-check-if-a-file-exists-in-golang

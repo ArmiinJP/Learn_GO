@@ -162,6 +162,20 @@ scanner.Text()
  با این متود ورودی‌ای که کاربر مینویسد و  ما اسکنش کردیم را میتونیم در قالب رشته بگیریم.
 فایل را که open کردی میتونیم به جای os.Stdin بهش پاس بدیم.
 
+÷÷÷÷÷÷÷÷÷ پکیج encoding
+https://pkg.go.dev/encoding
+ascii85 ==  implements the ascii85 data encoding as used in the btoa tool and Adobe's PostScript and PDF document formats.
+asn1 ==  implements parsing of DER-encoded ASN.1 data structures, as defined in ITU-T Rec X.690.
+base32 == implements base32 encoding as specified by RFC 4648.
+base64 == implements base64 encoding as specified by RFC 4648.
+binary == implements simple translation between numbers and byte sequences and encoding and decoding of varints.
+csv == reads and writes comma-separated values (CSV) files.
+gob == manages streams of gobs - binary values exchanged between an Encoder (transmitter) and a Decoder (receiver).
+hex == implements hexadecimal encoding and decoding.
+json == implements encoding and decoding of JSON as defined in RFC 7159.
+pem == implements the PEM data encoding, which originated in Privacy Enhanced Mail.
+xml == implements a simple XML 1.0 parser that understands XML name spaces.
+
 finish
 -------------------------------------------------------------------------------
 |^^^| types
@@ -432,6 +446,10 @@ var myMap = map[int]string{
 
 
 ÷÷÷÷÷÷÷÷÷ کار با فایل:
+https://kgrz.io/reading-files-in-go-an-overview.html
+https://github.com/PacktPublishing/Mastering-Go/blob/master/ch08/save.go
+https://www.golinuxcloud.com/golang-append-to-file/
+
 https://www.golinuxcloud.com/golang-read-update-same-file/
 https://zetcode.com/golang/bufio/
 https://www.educative.io/answers/how-to-read-and-write-with-golang-bufio
