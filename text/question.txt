@@ -83,11 +83,15 @@ if err != nil{
 
 ------------------- اما searching
 dgraph memory c package
-
 تفاوت seralizitain و encoding 
-انواع hashing
-خب بحث hashing password
 انواع serializtion
 خب golang sdk 
+encoding/gob
 
+این سم چیه [:]
+func hashThePassword(password string) string {
+	hash := md5.Sum([]byte(password))
+
+	return hex.EncodeToString(hash[:])
+}
 

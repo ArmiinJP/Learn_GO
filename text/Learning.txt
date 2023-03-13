@@ -133,6 +133,52 @@ finish
 خود go یکسری کتابخونه داره که در قالب پکیج ها در اختیارشون داره مثل pacakge "fmt - داخل go land یک قسمت external library هست، که در قسمت Go sdk تمامی این کتابخونه های اون ورژنی از go که داریش در دسترس گذاشته و داخل هر کدوم هم یک فایل doc.go هست که توضیحات اون کتابخونه را نوشته به راحتی با import میتونی بیاریشون. که تو مسیری که  GOROOT هم نشون میده داخل بخش src میتونی ببینی این پکیج ها را  و همون go doc و غیره را...
 مسیر GOROOT مسیری هست که هم کامپایلر golang هم سورس کدهای کتابخونه‌های استاندارد گو قرار میگیره، دقیقا کامپایلری که استفاده میکنی تو مسیر usr/local/bin/go هست. اما GOPATH اون مسیری هست که شما میخوای سورس کدهای پروژه‌های خودت را و پکیج‌های شخص ثالثی که خودت دانلود میکنی را قرارشون بدی.
 
+÷÷÷÷÷÷÷÷÷ پکیج‌های hashing 
+کلا برای دیدن توضیحات هش اول این جا را ببین:
+https://golangprojectstructure.com/hash-functions-go-code/
+برای نمونه اونایی که تو کتابخانه‌های استاندارد هستند:
+Adler-32			"hash/adler32"
+CRC-32				"hash/crc32"
+CRC-64				"hash/crc64"
+FNV					"hash/fnv"
+MD5					"crypto/md5"
+SHA-1				"crypto/sha1"
+SHA-224 and SHA-256	"crypto/sha256"
+SHA-384 and SHA-512	"crypto/sha512"
+که خود این crypto پره از این هش‌های مختلف:
+https://pkg.go.dev/crypto
+
+کتابخونه‌های غیراستاندارد که باید دانلود کنیم هم هست: که اسمش bcrypt هست و لینکش در زیر هست
+https://pkg.go.dev/golang.org/x/crypto/bcrypt
+آموزشش هم در ادامه آوردم:
+https://dev.to/nwby/how-to-hash-a-password-in-go-4jae
+
+مثال: الان یک نمونش کد زیر هست که پسورد را در قالب اسلایسی از بایت میگیره، و بعد هش encode شده را که هدف از encode هم ذخیره‌ی داده در قالب کارکترهای قابل نمایش هست، برمیگردونه: ینی هم پکیج crypto/sha512 برای هش کردن استفاده شده که خروجی هش hash.Sum(nil) هست که اسلایسی از بایت هست. حالا اگه اینا شما بدین به string احتمالا خیلی از کارکترها قابل خوندن نباشند برای اینکه این مشکل حل بشه ما اینا encode اش کردیم به کمک پکیج "encoding/base64" که یک اسلایسی از بایت میگیره و خروجی به ما یک رشته‌ی encode شده میده.
+پس از کد درباره پکیجهای encoding هم نوشتم.
+func hashPassword(password []byte ) string{
+	hash := sha512.New()
+	hash.Write(password)
+	encodedHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+	return encodedHash
+}
+
+÷÷÷÷÷÷÷÷÷ پکیج encoding
+روش‌های مختلف encoding در go در این لینک امده:
+https://pkg.go.dev/encoding
+ascii85 ==  implements the ascii85 data encoding as used in the btoa tool and Adobe's PostScript and PDF document formats.
+asn1 ==  implements parsing of DER-encoded ASN.1 data structures, as defined in ITU-T Rec X.690.
+base32 == implements base32 encoding as specified by RFC 4648.
+base64 == implements base64 encoding as specified by RFC 4648.
+binary == implements simple translation between numbers and byte sequences and encoding and decoding of varints.
+csv == reads and writes comma-separated values (CSV) files.
+gob == manages streams of gobs - binary values exchanged between an Encoder (transmitter) and a Decoder (receiver).
+hex == implements hexadecimal encoding and decoding.
+json == implements encoding and decoding of JSON as defined in RFC 7159.
+pem == implements the PEM data encoding, which originated in Privacy Enhanced Mail.
+xml == implements a simple XML 1.0 parser that understands XML name spaces.
+
+یک نمونه مثال عملی برای encoding از نوع base64:
+https://pkg.go.dev/encoding/base64#example-package
 
 ÷÷÷÷÷÷÷÷÷ پکیج flag 
 پکیج خیلی خوب برای نوشتن برنامه‌های cli در go این flag هست.
@@ -161,20 +207,6 @@ scanner.Scan()
 scanner.Text()
  با این متود ورودی‌ای که کاربر مینویسد و  ما اسکنش کردیم را میتونیم در قالب رشته بگیریم.
 فایل را که open کردی میتونیم به جای os.Stdin بهش پاس بدیم.
-
-÷÷÷÷÷÷÷÷÷ پکیج encoding
-https://pkg.go.dev/encoding
-ascii85 ==  implements the ascii85 data encoding as used in the btoa tool and Adobe's PostScript and PDF document formats.
-asn1 ==  implements parsing of DER-encoded ASN.1 data structures, as defined in ITU-T Rec X.690.
-base32 == implements base32 encoding as specified by RFC 4648.
-base64 == implements base64 encoding as specified by RFC 4648.
-binary == implements simple translation between numbers and byte sequences and encoding and decoding of varints.
-csv == reads and writes comma-separated values (CSV) files.
-gob == manages streams of gobs - binary values exchanged between an Encoder (transmitter) and a Decoder (receiver).
-hex == implements hexadecimal encoding and decoding.
-json == implements encoding and decoding of JSON as defined in RFC 7159.
-pem == implements the PEM data encoding, which originated in Privacy Enhanced Mail.
-xml == implements a simple XML 1.0 parser that understands XML name spaces.
 
 finish
 -------------------------------------------------------------------------------
@@ -596,6 +628,9 @@ finish
 
 ÷÷÷÷÷÷÷÷÷ بحث Sanitize کردن، یعنی صحت و درستی اطلاعات را قبل از اینکه به اون مرحله‌ی اسفتاده برسه، بررسی کنیم. مثلا validation یک نوع از sanitize هست، یعنی اینیملی که داری میدی درسته یا نه یه چیز کشکی ندی. عموما در جاهای مختلف پروژه ما بخش‌های مختلفی میزاریم که اطلاعات را بیاد Sanitize کنه . این کار خیلی بهتر از این هست که بیایم defencive programming کنیم، یعنی من از اکسپشن و باگ خوردن میترسم  ، هر چیزی که دمه دستم میاد را میخوام چک کنم (دقیقه ۱.۱۳ فیلم ۵.۲) باید ساختار و روند پروژه را جوری بچینیم که مطمئن باشیم اطلاعات Sanitize میشند و هر بخش نگرانی دیگه نداشته باشیم اطلاعاتی که داره میاد همونی هست که ما انتظار داریم یا خیر 
  
+÷÷÷÷÷÷÷÷÷ بحث hashing و اینکه پسورد ها را در قالب هش ذخیره کنیم، بسیار اهمیت داره، که اگر دیتابیسمون به خطر افتاد نیومده باشیم پسوردها را در قالب plain گذاشته باشیم و در واقع هش‌ها به دست مهاجم بیفته، با هش ها هم نمیتونه به پسورد اصلی برسه، مگه اینکه اومده باشه تمامی حالت‌های مممکن پسورد را براش هش درست کرده باشه و حالا بیاد هش ها را مقایسه کنه اگه تطابق داشت میفهمه کدوم پسورد هشش این بوده. که خب عملا در زمان معقول نمیتونه به این برسه، لذا با این که هش ها میفته دست مهاجم ولی کاری از پیش نمیتونه ببره، البته به شرطی که تابع هش خوبی استفاده کرده باشه، در نظر هم داشته باش که توابع هش یک طرفه هستند یعنی از هش نهمیتونی به پسورد برسی، تنها راهش همونطور که گفتم ، مقایسه و سعی و خطا هست و گرنه از هش نمیشه به پسورد رسید. در قسمت package ها برای go توابع هش مختلف را اوردم.
+
+
 ÷÷÷÷÷÷÷÷÷ بحث transparency در برنامه‌نویسی هر چه شفافتر باشید بهتره، کلا ما شفافیت‌های مجزا داریم، یک بخشش سمت کاربر هست که میفهمه مشکل چی بوده، یک بخشش سمت خودمون(یعنی سرور) هست که باعث میشه خطایابی و تریس برنامه راحت بشه. و برای اینکار ممکنه یک سری چیزارا لاگ کنیم، برای این کار خوبه که شفاف باشیم.
 اما این وسط ما بعد امنیت را هم سمت بکند داریم. کاربر را صرفا گل و بلبل نبیندید یه هکر عوضی ببینید، لذا شفافیت سمت کاربر باید به سمت مبهم بودن پیش بره، ینی اقا مثلا نام کاربری یا رمزت غلطه ولی براش مشخص نکنید که کدومش دقیقا غلط بوده
 

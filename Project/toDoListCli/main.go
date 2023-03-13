@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"encoding/xml"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"strings"
 	"bufio"
 	"log"
+	"crypto/sha512"
+
 
 	//"errors"
 )
@@ -72,6 +75,7 @@ func main() {
 		userCommand = ""
 	}
 }
+
 func LoginUser() {
 	//var isEmpty int
 	fmt.Println("\n----- Logging User ----- ")
@@ -105,6 +109,7 @@ func LoginUser() {
 
 	fmt.Printf("Please enter your Password: ")
 	fmt.Scanln(&newUser.Password)
+	newUser.Password = hashPassword([]byte(newUser.Password))
 
 	for _, user := range Users {
 		if user.Email == newUser.Email && user.Password == newUser.Password {
@@ -118,6 +123,7 @@ func LoginUser() {
 		fmt.Println("\n----- Faild Logging !!")
 	}
 }
+
 func RegisterUser() {
 	var newUser User
 	//var isEmpty int
@@ -129,6 +135,7 @@ func RegisterUser() {
 
 	fmt.Printf("Please enter your Password: ")
 	fmt.Scanln(&newUser.Password)
+	newUser.Password = hashPassword([]byte(newUser.Password))
 	//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
 
 	newUser.ID = len(Users) + 1
@@ -182,6 +189,7 @@ func CreateTask(){
 	Tasks = append(Tasks, newTask)
 	fmt.Println("Task Successfully Added")
 }
+
 func ListTask(){
 	for _, v := range Tasks{
 		if v.UserID == authenticatedUser.ID {
@@ -192,6 +200,7 @@ func ListTask(){
 		}
 	}
 }
+
 func ListTodayTask(){}
 func ListDayTask()      {}
 func EditTask()         {}
@@ -211,6 +220,7 @@ func CreateCategory(){
 	Categoreis = append(Categoreis, newCategory)
 	fmt.Println("Category Successfully Added")	
 }
+
 func ListCategory(){
 	for _, v := range Categoreis{
 		if v.UserID == authenticatedUser.ID {
@@ -220,7 +230,9 @@ func ListCategory(){
 		}
 	}
 }
+
 func EditCategory(){}
+
 func RunCommand(userCommand string){
 
 	//service need logging before use, except exit & register-user
@@ -266,6 +278,7 @@ func RunCommand(userCommand string){
 			fmt.Printf("\n--- command %s is not found!!\n", userCommand)
 	}
 }
+
 func giveUserCommand(userFlag string) string{
 	var userCommand string
 	if userFlag == ""{
@@ -287,6 +300,7 @@ func giveUserCommand(userFlag string) string{
 
 	return userCommand
 }
+
 func checkFormatFile(userFormatFlag string) string{
 	//datase --> if exist 	  : return name dataset and set usersFileFormat to format dataset
 	//		 	 if not exist : return "" and set usersFileFormat to user flag format or default format(json)
@@ -329,6 +343,7 @@ func checkFormatFile(userFormatFlag string) string{
 		return fileDatasetName
 	}
 }
+
 func readDataset(datasetName string) error{
     // open file
     f, err := os.Open(datasetName)
@@ -383,6 +398,7 @@ func readDataset(datasetName string) error{
 
 	return nil
 }
+
 func saveToFile(newUser User) error{
 	//Choose format to save into file
 	var data []byte
@@ -437,4 +453,12 @@ func saveToFile(newUser User) error{
 	}
 
 	return nil
+}
+
+func hashPassword(password []byte ) string{
+	hash := sha512.New()
+	hash.Write(password)
+
+	encodedHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+	return encodedHash
 }

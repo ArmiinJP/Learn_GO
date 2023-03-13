@@ -44,12 +44,4 @@ fmt.Sprintf("%02d:%02d", c.Hour, c.Min)
 چطور ببینیم یک فایل وجود داره یا نه
 https://www.educative.io/answers/how-to-check-if-a-file-exists-in-golang
 ------------------- 
-موقع نوشتن توابع خطا خیلی شیک و منطقی داخل تابع error برگردونه که مثلا به صورت زیر فرمی هست که تو تابع readDatatest نوشتم:
-f, err := os.Open(datasetName)
-if err != nil {
-        return fmt.Errorf("error when open Dataset\n")}
-و نحوه‌ی کنترل خطا داخل main که این تابع را صدا زده بودم به صورت زیر هست:
-err := readDataset(datasetNameExist)
-if err != nil{
-	log.Fatalln(err)}
-در واقع داخل تابع readDataset اگر خطایی رخ دهد من return میکنم لذا ادامه‌ی تابع اجرا نمیشه، برگشت، نوبت به 
+
