@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 	"bufio"
+	"log"
 
 	//"errors"
-	//"log"
 )
 
 type User struct {
@@ -46,6 +46,32 @@ var (
 	usersFileFormat string
 )
 
+func main() {
+	
+	fmt.Println("Welcome toDo App")
+	userCommandflag := flag.String("command", "", "enter your command")
+	userFormatFlag := flag.String("format", "", "enter your format to save file")
+	flag.Parse()
+
+	datasetNameExist := checkFormatFile(*userFormatFlag)
+
+	// reading dataset if dataset exist
+	if datasetNameExist != "" {
+		err := readDataset(datasetNameExist)
+		if err != nil{
+
+			log.Fatalln(err)
+		}
+	}
+
+	userCommand := *userCommandflag
+
+	for {
+		userCommand = giveUserCommand(userCommand)
+		RunCommand(userCommand)
+		userCommand = ""
+	}
+}
 func LoginUser() {
 	//var isEmpty int
 	fmt.Println("\n----- Logging User ----- ")
@@ -264,7 +290,7 @@ func giveUserCommand(userFlag string) string{
 func checkFormatFile(userFormatFlag string) string{
 	//datase --> if exist 	  : return name dataset and set usersFileFormat to format dataset
 	//		 	 if not exist : return "" and set usersFileFormat to user flag format or default format(json)
-	var fileFormats = []string{"data.csv", "data.json", "data.xml"}
+	var fileFormats = []string{"data.csv", "data.json", "data.xml", "data.txt"}
 	var err error
 	var fileDatasetName string
 
@@ -275,19 +301,26 @@ func checkFormatFile(userFormatFlag string) string{
 			break
 		}
 	}
-
+	// datase not exist
 	if fileDatasetName == ""{
 		usersFileFormat = strings.ToLower(userFormatFlag)
-		if usersFileFormat == ""{
-			fmt.Println("Format not Determine\n so default format (json) is apply")
-			usersFileFormat = "json"
-		} else if !(usersFileFormat == "json" || userFormatFlag == "xml" || userFormatFlag == "csv"){
-			fmt.Println("Format File you choose is False\n so default format (json) is apply")
-			usersFileFormat = "json"
-		} 
-
+		
+		switch usersFileFormat{
+			case "":
+				fmt.Println("Format not Determine\n so default format (json) is apply")
+				usersFileFormat = "json"
+			
+			case "json", "xml", "csv", "txt":
+				//usersFileFormat = usersFileFormat
+			
+			default:
+				fmt.Println("Format File you choose is False\n so default format (json) is apply")
+				usersFileFormat = "json"
+		}
+	
 		return ""
 
+	// datase exist
 	} else {
 		usersFileFormat = strings.Split(fileDatasetName, ".")[1]
 		fmt.Printf("file with format %s is Exist!\nso Data is save with format: | %s |\n",
@@ -318,12 +351,14 @@ func readDataset(datasetName string) error{
 
 				return fmt.Errorf("datas in dataset is wrong format for JSON")
 			}
+		
 		case "xml":
 			err = xml.Unmarshal([]byte(data), &fetchUser)
 			if err != nil{
 
 				return fmt.Errorf("datas in dataset is wrong format for JSON")
 			}			
+		
 		case "csv":
 			fetchUser.Email = strings.Split(data, ",")[0]
 			fetchUser.ID, err = strconv.Atoi(strings.Split(data, ",")[1])
@@ -332,6 +367,15 @@ func readDataset(datasetName string) error{
 				return fmt.Errorf("datas in dataset is wrong format for CSV")
 			}
 			fetchUser.Password = strings.Split(data, ",")[2]
+		
+		case "txt":
+			fetchUser.ID, err = strconv.Atoi(strings.Split(strings.Split(data, ",")[0], ": ")[1])
+			if err != nil{
+				return fmt.Errorf("datas in dataset is wrong format for TXT")
+
+			}
+			fetchUser.Email = strings.Split(strings.Split(data, ",")[1], ": ")[1]
+			fetchUser.Password = strings.Split(strings.Split(data, ",")[2], ": ")[1]
 		}
 
 		Users = append(Users, fetchUser)
@@ -366,6 +410,10 @@ func saveToFile(newUser User) error{
 		nameFile = "data.csv"
 		data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.ID, newUser.Password))
 	
+	case "txt":
+		nameFile = "data.txt"
+		data = []byte(fmt.Sprintf("id: %d, email: %s, password: %s", newUser.ID, newUser.Email, newUser.Password))
+	
 	default:
 
 		return fmt.Errorf("format to save file is invalid\n")
@@ -389,25 +437,4 @@ func saveToFile(newUser User) error{
 	}
 
 	return nil
-}
-func main() {
-	fmt.Println("Welcome toDo App")
-	userCommandflag := flag.String("command", "", "enter your command")
-	userFormatFlag := flag.String("format", "", "enter your format to save file")
-	flag.Parse()
-
-	datasetNameExist := checkFormatFile(*userFormatFlag)
-
-	// reading dataset if dataset exist
-	if datasetNameExist != "" {
-		readDataset(datasetNameExist)
-	}
-	
-	userCommand := *userCommandflag
-
-	for {
-		userCommand = giveUserCommand(userCommand)
-		RunCommand(userCommand)
-		userCommand = ""
-	}
 }

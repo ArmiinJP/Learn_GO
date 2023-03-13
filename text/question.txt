@@ -1,4 +1,4 @@
-
+وقتی همینطور گوتره ای return میکنیم با یه پغیام خطایی که با fmt.Print چاپ کردیم، چه مزیتی داره، چون وقتی از یک تابع با return خالی مثلا بیرون میاد، خب بعد ادامه برنامه بعد از فراخوانی تابع را میره اوکی میکنه، در صورتی که واقعا باید اگه خطا داشته مثلا برنامه متوقفی چیزی بشه.
 Enable dependency tracking for your code
 Go, VSC, Analysis Line Randombullshitgo and xcode, and GOMOD ffs.
 
