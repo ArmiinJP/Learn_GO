@@ -81,6 +81,7 @@ if err != nil{
 
 این بحث حلقه زدن بهینه
 
+go compile optimaztion
 ------------------- اما searching
 dgraph memory c package
 تفاوت seralizitain و encoding 
