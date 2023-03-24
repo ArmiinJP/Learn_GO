@@ -51,4 +51,30 @@ User
  - Log in user
  
 ------------------------------------
+add authentication & user entity
+add category entity and validate category id in create-task process
+
+add write user data to file
+ذخیره‌‌ی اطلاعات کاربران که در رم هست در داخل فایل 
+
+add manual incomplete serialization for storing user data in file
+دخیره‌ کردن اطلاعات کاربران در فایل به کمک روش سریالینگ دستی و من در آوردی
+
+move write user item to file functionality to separate function
+
+
+add json serialization & deserialization
+اضافه کردن روش json و احتمالا xml , csv برای فرمت ذخیره‌ی اطلاعات کاربران در فایل
+
+hash the password with md5 hashing 
+ذخیره‌ی پسورد کاربران در قالب هش به جای پلین ذخیره کردن آنها
+serialization vs encoding
+اضافه کردن روش ‌encoding به روی hasghing تا تبدیل به کارکترهای خوانا شود، مثلا base64
+remove redundant examples
+decouple loadUser and SaveUser logic from fileStorage
+move writeUserToFile from global funct to method of fielStore type
+refactor todo cli
+separate server and client logic for task use-cases
+add tcp server and client which supports json serialized message for communication
+get server address from command arguments
 
