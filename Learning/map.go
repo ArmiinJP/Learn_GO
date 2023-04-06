@@ -172,7 +172,7 @@ func main() {
 			fmt.Println("panic occurred:", err)
 		}
 	}()
-	
+
 	fmt.Println("\n\n============== map Learning ==============")
 	MapLearning()
 }
