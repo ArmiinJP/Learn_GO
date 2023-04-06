@@ -1,9 +1,9 @@
 package storage
 
 import (
- 	"applicationInterface/user"
+	"applicationInterface/user"
+	
 )
-
 
 // slice storage
 type InMemorySlice struct{

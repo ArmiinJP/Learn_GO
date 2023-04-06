@@ -12,10 +12,11 @@ func main(){
 	
 	var newApp = app.App{
 		Name: "testApp",
-		UserStorage: new(storage.InMemoryMap),
+		UserStorage: &storage.InMemoryMap{},
 		//UserStorage: &storage.InMemoryMap{},
 	}
 
+	
 	var newUser, newUser2 = user.User{
 		Name: "hasan",
 		ID: 1,
@@ -28,5 +29,5 @@ func main(){
 	newApp.UserStorage.CreateUser(newUser2)
 	
 	fmt.Println(newApp.UserStorage.ListUser())
-	
+
 }
