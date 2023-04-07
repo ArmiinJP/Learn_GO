@@ -104,3 +104,7 @@ packages
 testing
 go module
 
+
+کانکریت تایپ چیه
+
+بحث error wrap
