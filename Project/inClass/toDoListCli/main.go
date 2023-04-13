@@ -176,7 +176,7 @@ func CreateTask(){
 			break
 		}
 	}
-	if CategoryFound == false{
+	if !CategoryFound{
 		fmt.Printf("\nCategory with id: %d is not Found!!\n", tmpCategoryidInt)
 		
 		return
@@ -348,7 +348,7 @@ func readDataset(datasetName string) error{
     // open file
     f, err := os.Open(datasetName)
     if err != nil {
-        return fmt.Errorf("error when open Dataset\n")
+        return fmt.Errorf("error when open Dataset")
     }
     defer f.Close()
 
@@ -358,7 +358,9 @@ func readDataset(datasetName string) error{
     
 	for scanner.Scan() {
 		var err error
+		// delete "\n" of end of each line
         data = strings.Split(scanner.Text(), "\n")[0]
+
 		switch usersFileFormat {
 		case "json": 
 			err = json.Unmarshal([]byte(data), &fetchUser)
@@ -411,7 +413,7 @@ func saveToFile(newUser User) error{
 		data, err = json.Marshal(&newUser)
 		if err != nil {
 
-			return fmt.Errorf("Could not convert data to json\n")
+			return fmt.Errorf("could not convert data to json")
 		}		
 
 	case "xml":
@@ -419,7 +421,7 @@ func saveToFile(newUser User) error{
 		data, err = xml.Marshal(&newUser)
 		if err != nil {
 
-			return fmt.Errorf("Could not convert data to xml\n")
+			return fmt.Errorf("could not convert data to xml")
 		}
 
 	case "csv":
@@ -432,15 +434,15 @@ func saveToFile(newUser User) error{
 	
 	default:
 
-		return fmt.Errorf("format to save file is invalid\n")
+		return fmt.Errorf("format to save file is invalid")
 	}
 
 	//write data to the file
-    file,err := os.OpenFile(nameFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    file, err := os.OpenFile(nameFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     
     if err != nil {
     	
-		return fmt.Errorf("Could not open dataset\n")
+		return fmt.Errorf("could not open dataset")
 	}
 
 	defer file.Close()
@@ -449,7 +451,7 @@ func saveToFile(newUser User) error{
 
 	if err2 != nil {
 
-		return fmt.Errorf("Could not write data to dataset\n")
+		return fmt.Errorf("could not write data to dataset")
 	}
 
 	return nil
