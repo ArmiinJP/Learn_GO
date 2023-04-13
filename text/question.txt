@@ -108,3 +108,6 @@ go module
 کانکریت تایپ چیه
 
 بحث error wrap
+
+
+func Println(a ...any)
