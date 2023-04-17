@@ -17,6 +17,28 @@ import (
 	//"errors"
 )
 
+type UserReadStore interface{
+	Save(u User) error
+}
+type UserWriteStore interface{
+	Load() (User, error)
+}
+
+type FileStore struct{}
+
+func(f FileStore) Save(u User) error{
+	if err := saveToFile(u); err != nil{
+		return err
+	}
+
+	return nil
+}
+
+func (f FileStore) Load() (User, error){
+	
+}
+
+
 type User struct {
 	ID       int
 	Email    string
@@ -140,10 +162,13 @@ func RegisterUser() {
 
 	newUser.ID = len(Users) + 1
 
-	err := saveToFile(newUser)
-	if err != nil{
+	var urs UserReadStore
+	var fs = FileStore{}
+	urs = fs
+	if err := urs.Save(newUser); err != nil{
 		return
 	}
+
 	Users = append(Users, newUser)
 	fmt.Printf("\nUser with Email: %s\n---> Successfull Registerd\n", newUser.Email)	
 }
