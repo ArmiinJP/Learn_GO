@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"reflectTest/richError"
+	"reflectt/richError"
 	"time"
 )
 func main() {
