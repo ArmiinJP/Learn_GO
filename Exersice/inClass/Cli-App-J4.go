@@ -31,6 +31,7 @@ func CreateFile() {
     fmt.Printf("\nFile Name: %s", file.Name())
     fmt.Printf("\nLength: %d bytes", len)
 }
+
 func ReadFile() {
  
     fmt.Printf("\n\nReading a file in Go lang\n")
