@@ -1010,6 +1010,10 @@ fmt.Println(err.Error())
 
 هر جایی دیدی، ورودیش گفته بود any مطمئن باش داره از reflect استفاده میکنه.
 
+finish
+-------------------------------------------------------------------------------
+|^^^ Network
+
 
 finish
 -------------------------------------------------------------------------------
@@ -1062,6 +1066,7 @@ err = json.Unmarshal([]byte(data), &newUser) --> newUser get data if not err
 برای xml هم دقیقا همین ساختار را داریم به جای json ها بزار xml
 برای csv هم ساختار داریم اما خودت بیای استراکت مولفه‌هاش را با هم در یک رشته با جداکننده کاما کنار هم بنویسی، روش بهتریه در مثال زیر اینکار و انجام دادم فقط خودم تهش خواستم رشته نهایی را تبدیل به اسلایسی از بایت‌ها کنم.
 data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.ID, newUser.Password))
+https://zetcode.com/golang/csv/
 
 ÷÷÷÷÷÷÷÷÷ تفاوت encoding , serializtion
 باید توجه داشت که encoding یک دسته‌ی بزرگتری از serializtion هست. در واقع serializtion میشه جزیی از encoding و در واقع میشه گفت تمامی این serializtion ها encoding حساب میشند.
@@ -1158,4 +1163,5 @@ go test -bench . -benchmem
 https://www.practical-go-lessons.com/chap-34-benchmarks
 
 فیلم جلسه هفتم، بنچمارک و reflection
+
 
