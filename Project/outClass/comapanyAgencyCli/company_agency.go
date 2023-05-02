@@ -19,13 +19,13 @@ type Agency struct {
 	numberEmployee int
 }
 
+const Path = "./data.txt"
+
 var regionAgencies map[string][]Agency
 
 func checkFlagRegionAndExist(inputRegion string) (string, error) {
 	fRegion, err := checkFlagRegion(inputRegion)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 	// check region is Exist:
 	if _, ok := regionAgencies[fRegion]; !ok {
 		return "", fmt.Errorf("region %s is not Exist!\n", fRegion)
@@ -59,10 +59,8 @@ func get(region string, id int) (Agency, error) {
 	return Agency{}, fmt.Errorf("Agency with Id: %d is not Found!", id) //what is the better code ???
 }
 func create(region string, agency Agency) error {
-	file, err := os.OpenFile("./data.txt", os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil {
-		return err
-	}
+	file, err := os.OpenFile(Path, os.O_APPEND|os.O_WRONLY, 0600)
+	checkErr(err)
 	defer file.Close()
 
 	newLine := fmt.Sprintf("%s,%d,%s,%s,%s,%s,%d\n",
@@ -74,10 +72,8 @@ func create(region string, agency Agency) error {
 	return nil
 }
 func edit(region string, id int, agency Agency) error {
-	file, err := os.OpenFile("data.txt", os.O_RDONLY, 0600)
-	if err != nil {
-		return err
-	}
+	file, err := os.OpenFile(Path, os.O_RDONLY, 0600)
+	checkErr(err)
 	fileScanner := bufio.NewScanner(file)
 
 	fileScanner.Split(bufio.ScanLines)
@@ -97,13 +93,11 @@ func edit(region string, id int, agency Agency) error {
 	}
 
 	file.Close()
-	os.Remove("data.txt")
+	os.Remove(Path)
 	// what is the best solution ??????
-	os.Create("data.txt")
-	file, err = os.OpenFile("./data.txt", os.O_WRONLY, 0600)
-	if err != nil {
-		return err
-	}
+	os.Create(Path)
+	file, err = os.OpenFile(Path, os.O_WRONLY, 0600)
+	checkErr(err)
 	for _, v := range editedFile {
 		if _, err = file.WriteString(v); err != nil {
 			return err
@@ -120,10 +114,8 @@ func status(region string) (int, int) {
 	return len(regionAgencies[region]), numberAllEmploye
 }
 func textFileToMapStructure() error {
-	file, err := os.OpenFile("data.txt", os.O_RDONLY, 0600)
-	if err != nil {
-		return err
-	}
+	file, err := os.OpenFile(Path, os.O_RDONLY, 0600)
+	checkErr(err)
 	fileScanner := bufio.NewScanner(file)
 
 	fileScanner.Split(bufio.ScanLines)
@@ -135,17 +127,13 @@ func textFileToMapStructure() error {
 	for fileScanner.Scan() {
 		tmpSlice = strings.Split(fileScanner.Text(), ",")
 		tmpAgency.Id, err = strconv.Atoi(tmpSlice[1])
-		if err != nil {
-			return err
-		}
+		checkErr(err)
 		tmpAgency.Name = tmpSlice[2]
 		tmpAgency.Address = tmpSlice[3]
 		tmpAgency.phoneNumber = tmpSlice[4]
 		tmpAgency.registeryDate = tmpSlice[5]
 		tmpAgency.numberEmployee, err = strconv.Atoi(tmpSlice[6])
-		if err != nil {
-			return err
-		}
+		checkErr(err)
 		if _, ok := regionAgencies[tmpSlice[0]]; ok {
 			regionAgencies[tmpSlice[0]] = append(regionAgencies[tmpSlice[0]], tmpAgency)
 		} else {
@@ -164,6 +152,12 @@ func calcId() int {
 	}
 	return lastId
 }
+func checkErr(err error){
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	regionAgencies = make(map[string][]Agency)
 
@@ -172,9 +166,7 @@ func main() {
 	flag.Parse()
 
 	err := textFileToMapStructure()
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 
 	lastId := calcId()
 
@@ -182,9 +174,7 @@ func main() {
 	case "list":
 		{
 			fRegion, err := checkFlagRegionAndExist(*region)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 
 			var listAgency []Agency
 			listAgency = list(fRegion)
@@ -195,16 +185,12 @@ func main() {
 	case "get":
 		{
 			fRegion, err := checkFlagRegionAndExist(*region)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 			var inputId int
 			fmt.Printf("Please enter ID of Agency: ")
 			fmt.Scanln(&inputId)
 			chooseAgency, err := get(fRegion, inputId)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 			fmt.Println("==============================================")
 			fmt.Println("region is:", fRegion,
 				"\nID of Agency is:", chooseAgency.Id,
@@ -217,9 +203,7 @@ func main() {
 	case "create":
 		{
 			fRegion, err := checkFlagRegion(*region)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 			var newAgency Agency
 			newAgency.Id = lastId + 1
 			fmt.Print("Please enter this values:\nName of Agency: ")
@@ -234,27 +218,21 @@ func main() {
 			fmt.Scanln(&newAgency.numberEmployee)
 
 			err = create(fRegion, newAgency)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 		}
 	case "edit":
 		{
 			fRegion, err := checkFlagRegionAndExist(*region)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 			var inputId int
 			fmt.Printf("Please enter ID of Agency: ")
 			fmt.Scanln(&inputId)
 			chooseAgency, err := get(fRegion, inputId)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 
 			var tmpAgency Agency
 			checkValue := func(new string, old string) string {
-				if new == "N" || new == "No" || new == "NO" || new == "no" || new == "n" {
+				if strings.ToLower(new) == "no" || strings.ToLower(new) == "n" {
 					return old
 				} else {
 					return new
@@ -282,22 +260,16 @@ func main() {
 			fmt.Printf("Number of employee is: %d, Are you change it?(No or new_value): ", chooseAgency.numberEmployee)
 			fmt.Scanln(&tmp)
 			tmpAgency.numberEmployee, err = strconv.Atoi(checkValue(tmp, strconv.Itoa(chooseAgency.numberEmployee)))
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 
 			err = edit(fRegion, inputId, tmpAgency)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 
 		}
 	case "status":
 		{
 			fRegion, err := checkFlagRegionAndExist(*region)
-			if err != nil {
-				log.Fatal(err)
-			}
+			checkErr(err)
 			numberAllAgency, numberAllEmploye := status(fRegion)
 			fmt.Printf("in region %s, number of total Agency is: %d, number of total Employee is: %d\n",
 				fRegion, numberAllAgency, numberAllEmploye)
