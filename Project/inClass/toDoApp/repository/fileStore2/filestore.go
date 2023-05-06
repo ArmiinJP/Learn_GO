@@ -1,6 +1,6 @@
 package filestore2
 
-import "session_2_2/entity"
+import "todolistapp/entity"
 
 type FileStorage2 struct {}
 

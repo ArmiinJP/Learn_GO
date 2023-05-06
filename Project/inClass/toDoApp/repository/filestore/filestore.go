@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"session_2_2/constant"
-	"session_2_2/entity"
+	"todolistapp/constant"
+	"todolistapp/entity"
 )
 type FileStorage struct{
 	path string

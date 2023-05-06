@@ -14,46 +14,40 @@ import (
 
 	// "strings"
 
-	"session_2_2/constant"
-	"session_2_2/contract"
-	"session_2_2/entity"
-	// "session_2_2/fileStore2"
-	"session_2_2/filestore"
+	"todolistapp/constant"
+	"todolistapp/contract"
+	"todolistapp/entity"
+	"todolistapp/service/task"
+
+	// "todolist/fileStore2"
+	"todolistapp/repository/filestore"
+	"todolistapp/repository/memorystore"
 )
 
 
-type Task struct {
-	ID         int
-	Title      string
-	DueDate    string
-	CategoryID int
-	IsDone     bool
-	UserID     int
-}
-
-type Category struct {
-	ID     int
-	Title  string
-	Color  string
-	UserID int
-}
-
 var (
 	userStorage     []entity.User
-	categoryStorage []Category
-	taskStorage     []Task
-
+	categoryStorage []entity.Category
+	
 	authenticatedUser *entity.User
 	serializationMode string
 
 )
 
 
-func main() {
+func  main() {
+
+	taskMemoryRepo := memorystore.NewTask()
+
+	taskService := task.NewService(taskMemoryRepo)
+
 	serializeMode := flag.String("serialize-mode", constant.ManDarAvardiSerializationMode, "serialization mode to write data to file")
 	command := flag.String("command", "no-command", "command to run")
 	flag.Parse()
 	fmt.Println("Hello to TODO app")
+
+
+
 
 	switch *serializeMode {
 	case constant.ManDarAvardiSerializationMode:
@@ -72,9 +66,10 @@ func main() {
 	userStorage = append(userStorage, ur.Read()...) 
 
 
+	
 
 	for {
-		runCommand(*command, userfileStore)
+		runCommand(*command, userfileStore, &taskService)
 
 		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Println("please enter another command")
@@ -83,7 +78,7 @@ func main() {
 	}
 }
 
-func runCommand(command string, ui contract.UserStoreWrite) {
+func runCommand(command string, ui contract.UserStoreWrite, taskService *task.Service) {
 	if command != "register-user" && command != "exit" && authenticatedUser == nil {
 		login()
 
@@ -95,13 +90,13 @@ func runCommand(command string, ui contract.UserStoreWrite) {
 	
 	switch command {
 	case "create-task":
-		createTask()
+		createTask(taskService)
 	case "create-category":
 		createCategory()
 	case "register-user":
 		registerUser(ui)
 	case "list-task":
-		listTask()
+		listTask(taskService)
 	case "login":
 		login()
 	case "exit":
@@ -111,7 +106,7 @@ func runCommand(command string, ui contract.UserStoreWrite) {
 	}
 }
 
-func createTask() {
+func createTask(taskService *task.Service) {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	var title, duedate, category string
@@ -131,38 +126,21 @@ func createTask() {
 		return
 	}
 
-	isFound := false
-	for _, c := range categoryStorage {
-		if c.ID == categoryID && c.UserID == authenticatedUser.ID {
-			isFound = true
-
-			break
-		}
-	}
-
-	if !isFound {
-		fmt.Printf("category-id is not found\n")
-
-		return
-	}
-
 	fmt.Println("please enter the task due date")
 	scanner.Scan()
 	duedate = scanner.Text()
 
-	// validation
-	// category validate
-
-	task := Task{
-		ID:         len(taskStorage) + 1,
-		Title:      title,
-		DueDate:    duedate,
+	task, err := taskService.CreatedTask(task.CreatedRequest{
+		Title: title,
+		DueDate: duedate,
 		CategoryID: categoryID,
-		IsDone:     false,
-		UserID:     authenticatedUser.ID,
+		AutheticatedUserID: authenticatedUser.ID,
+	})
+	if err != nil{
+		fmt.Println("error", err)
 	}
 
-	taskStorage = append(taskStorage, task)
+	fmt.Println(task.Task)
 }
 
 func createCategory() {
@@ -178,7 +156,7 @@ func createCategory() {
 	color = scanner.Text()
 	fmt.Println("category", title, color)
 
-	c := Category{
+	c := entity.Category{
 		ID:     len(categoryStorage) + 1,
 		Title:  title,
 		Color:  color,
@@ -245,12 +223,14 @@ func login() {
 	}
 }
 
-func listTask() {
-	for _, task := range taskStorage {
-		if task.UserID == authenticatedUser.ID {
-			fmt.Println(task)
-		}
+func listTask(taskService *task.Service) {
+	
+	userTasks, err := taskService.ListTask(task.ListRequest{UserID: authenticatedUser.ID})
+	if err != nil{
+		fmt.Println("error", err)
 	}
+
+	fmt.Println(userTasks.Tasks)
 }
 
 // func loadUserStorage (ur contract.UserStoreRead) {
@@ -264,4 +244,3 @@ func hashThePassword(password string) string {
 
 	return hex.EncodeToString(hash[:])
 }
-

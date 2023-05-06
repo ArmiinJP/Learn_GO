@@ -1,3 +1,3 @@
-module session_2_2
+module todolistapp
 
-go 1.19
+go 1.20
