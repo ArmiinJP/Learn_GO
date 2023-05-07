@@ -11,12 +11,17 @@ import (
 
 func main(){
 
-	command := flag.String("command", "", "")
+	command := flag.String("command", "empty", "")
+	address := flag.String("address", "empty", "")
 	flag.Parse()
+	if *address == "empty"{
+		fmt.Println("address is invalid")
 
+		return
+	}
 	
 	//client start connect to server
-	connection, cErr := net.Dial("tcp", "127.0.0.1:2023")
+	connection, cErr := net.Dial("tcp", *address)
 	if cErr != nil{
 		log.Fatalln("error connection")
 	}

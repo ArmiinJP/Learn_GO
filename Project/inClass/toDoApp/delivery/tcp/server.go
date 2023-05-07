@@ -12,7 +12,7 @@ import (
 
 func main(){
 
-	listener, lErr := net.Listen("tcp", "127.0.0.1:2023")
+	listener, lErr := net.Listen("tcp", ":2023")
 	if lErr != nil{
 		fmt.Println("error occured:", lErr)
 		//sdfasf
