@@ -48,14 +48,13 @@ func main(){
 
 			continue			
 		}
-		fmt.Printf("data Read: %+v, from %s", request, conn.RemoteAddr())
 
 		switch request.Command {
 		case "create-task":
 			response , cErr := taskService.CreatedTask(task.CreatedRequest{
-				Title: "",
-				DueDate: "",
-				CategoryID: 0,
+				Title: request.Values.Title,
+				DueDate: request.Values.DueDate,
+				CategoryID: request.Values.CategoryID,
 				AutheticatedUserID: 0,
 			})
 			if cErr != nil{
@@ -67,6 +66,8 @@ func main(){
 				}				
 			}
 			
+			fmt.Printf("data Read: %+v, from %s\n", request, conn.RemoteAddr())
+
 			res, mErr := json.Marshal(&response)
 			if mErr != nil{
 				_, wErr := conn.Write([]byte(mErr.Error()))
