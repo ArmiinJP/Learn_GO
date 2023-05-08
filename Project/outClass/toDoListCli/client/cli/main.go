@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"net"
 	"os"
 	"strconv"
 	requestParam "todolist/delivery/requestParam"
@@ -12,40 +13,45 @@ import (
 func main() {
 
 	fmt.Println("Welcome toDo App")
-	userCommandflag := flag.String("command", "", "enter your command")
+	userCommandFlag := flag.String("command", "", "enter your command")
+	targetServerFlag := flag.String("target", "", "enter server IP:PORT")
 	flag.Parse()
 
-	userCommand := parsingFlag(*userCommandflag)
-
-	// task service running
+	userCommand, userTarget := parsingFlag(*userCommandFlag, *targetServerFlag)
 
 	for {
 		dataRequest, cErr := completeCommand(userCommand /* inja task service*/)
 		if cErr != nil {
 			fmt.Println(cErr.Error())
 		} else {
-			//networking
-			// test := parameterCommand.CreateTask{}
-			// json.Unmarshal(dataRequest, &test)
-			// fmt.Println(test)
-			fmt.Println(string(dataRequest))
+			jsonResponse, sErr := socketLayer(dataRequest, userTarget)
+			if sErr != nil{
+				fmt.Println(sErr.Error())
+			}
+
+			fmt.Println(string(jsonResponse))
 		}
+
 		userCommand = giveUserCommand()
 	}
 }
 
-func parsingFlag(commandFlag string) string {
+//ParsingFlag Function do parsing Flag if exist and give flag if not exist
+func parsingFlag(commandFlag, targetFlag string) (string, string) {
+	
 
-	//This function parsing Flag if exist and give flag if not exist
-	var userCommand string
+	// parsing targetFlag
+	for targetFlag == "" {
+		fmt.Printf("Please Enter Target:(IPServer:PORTServer): ")
+		fmt.Scanln(&targetFlag)
+	}
 
 	// parsing commandFlag
-	if commandFlag == "" {
+	for commandFlag == "" {
 		commandFlag = giveUserCommand()
 	}
-	userCommand = commandFlag
-
-	return userCommand
+	
+	return commandFlag, targetFlag
 }
 
 func giveUserCommand() string {
@@ -243,4 +249,25 @@ func completeCommand(userCommand string) ([]byte, error) {
 	}
 
 	return []byte{}, nil
+}
+
+func socketLayer(data []byte, target string) ([]byte, error){
+	
+	conn, dErr := net.Dial("tcp", target)
+	if dErr != nil{
+		return []byte{}, fmt.Errorf("error Dialing: %s", dErr.Error())
+	}
+
+	_, wErr := conn.Write(data)
+	if wErr != nil{
+		return []byte{}, fmt.Errorf("error Sending data to Server: %s", wErr.Error())
+	}
+
+	var res = make([]byte, 1024)
+	numberOfByte, rErr := conn.Read(res)
+	if rErr != nil{
+		return []byte{}, fmt.Errorf("error Reading data from Server: %s", rErr.Error())
+	}
+
+	return res[:numberOfByte], nil
 }

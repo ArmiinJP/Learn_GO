@@ -9,3 +9,4 @@ type UserWriteStore interface{
 type UserLoadStore interface{
 	Load() ([]entity.User, error)
 }
+
