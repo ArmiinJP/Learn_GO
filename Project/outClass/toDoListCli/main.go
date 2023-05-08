@@ -18,27 +18,11 @@ import (
 
 var (
 	users []entity.User
-	Tasks []Task
-	Categoreis []Category
+	Tasks []entity.Task
+	Categoreis []entity.Category
 
 	authenticatedUser *entity.User
 )
-
-type Task struct {
-	ID         int
-	Title      string
-	DueDate    string
-	CategoryID   int
-	IsComplete bool
-	UserID     int
-}
-
-type Category struct {
-	ID	   int
-	Title  string
-	Color  string
-	UserID int
-}
 
 func main() {
 	
@@ -230,7 +214,7 @@ func RegisterUser(writeUser contract.UserWriteStore) {
 }
 
 func CreateTask(){
-	var newTask Task
+	var newTask entity.Task
 	fmt.Println("\n---- Creating Task")
 
 	fmt.Printf("Please enter Task Title: ")
@@ -283,7 +267,7 @@ func ListTask(){
 }
 
 func CreateCategory(){
-	var newCategory Category
+	var newCategory entity.Category
 	fmt.Println("\n---- Creating Category")
 
 	fmt.Printf("Please enter Category Title: ")

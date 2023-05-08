@@ -1293,6 +1293,7 @@ https://www.practical-go-lessons.com/chap-34-benchmarks
 فیلم جلسه هفتم، بنچمارک و reflection
 
 ÷÷÷÷÷÷÷÷÷ بحث ارتباط با server
+فرستادن فایل داخل سیستم به سرور به کمک scp
 scp LOCALFIIL/LOCALFOLDER USER@IP:/DIR 
 
 ÷÷÷÷÷÷÷÷÷ بحث git

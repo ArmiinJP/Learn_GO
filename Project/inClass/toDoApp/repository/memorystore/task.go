@@ -11,6 +11,7 @@ type Task struct {
 func NewTask() *Task{
  	return &Task{tasks: make([]entity.Task, 0)}
 }
+
 func (t Task) ListUserTask(userID int) ([]entity.Task, error) {
 
 	var userTasks []entity.Task
