@@ -113,8 +113,8 @@ func RunCommand(userCommand string, writeUser contract.UserWriteStore){
 			ListTask()
 		case "list-today-task":
 			ListTodayTask()
-		case "list-day-task":
-			ListDayTask()
+		case "list-specific-day-task":
+			ListSpecificDayTask()
 		case "edit-task":
 			EditTask()
 		case "task-complete":
@@ -221,9 +221,8 @@ func CreateTask(){
 	fmt.Scanln(&newTask.Title)	
 	fmt.Printf("Please enter Task DueDate: ")
 	fmt.Scanln(&newTask.DueDate)	
-	
-	//validating category Exist (int && category user exist)
 	fmt.Printf("Please enter Task Category ID: ")
+
 	var tmpCategoryidStr string
 	fmt.Scanln(&tmpCategoryidStr)
 	tmpCategoryidInt, err := strconv.Atoi(tmpCategoryidStr)
@@ -292,7 +291,7 @@ func ListCategory(){
 }
 
 func ListTodayTask(){}
-func ListDayTask(){}
+func ListSpecificDayTask(){}
 func EditTask(){}
 func ChangeStatusTask(){}
 func EditCategory(){}
