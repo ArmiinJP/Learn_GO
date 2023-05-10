@@ -1,6 +1,7 @@
 package taskservice
 
 import (
+	"encoding/json"
 	"fmt"
 	"todolist/delivery/requestParam"
 	"todolist/delivery/response"
@@ -8,9 +9,10 @@ import (
 )
 
 type TaskRepo interface {
-	Create(entity.Task) error
-	//List(u entity.User, c entity.Category) ([]entity.Task, error)
-	//Edit(entity.Task, entity.Task) error 
+	Create(task entity.Task) error
+	List(userID int) ([]entity.Task, error)
+	Edit(task entity.Task) error 
+	ChangeStatus(editedTask entity.Task) error
 }
 
 type Service struct {
@@ -21,7 +23,7 @@ func New(tr TaskRepo) Service{
 	return Service{repository: tr}
 }
 
-func (s Service) CreateTaskRequest(request requestParam.ValuesCreateTask) (response.Param, error){
+func (s Service) CreateTaskRequest(request requestParam.ValuesCreateTask) (responseParam.Response, error){
 	cErr := s.repository.Create(entity.Task{
 		Title: request.Title,
 		DueDate: request.DueDate,
@@ -31,16 +33,57 @@ func (s Service) CreateTaskRequest(request requestParam.ValuesCreateTask) (respo
 	})
 
 	if cErr != nil{
-		return response.Param{StatusCode: 500, Message: "Failed to Create Task"}, fmt.Errorf("error Creating task: %s", cErr.Error())
+		return responseParam.Response{StatusCode: 500, Message: "Failed to Create Task", Data: []byte{}}, fmt.Errorf("error Creating task: %s", cErr.Error())
 	}
 
-	return response.Param{StatusCode: 200, Message: "Create Task Successfully"}, nil
+	return responseParam.Response{StatusCode: 200, Message: "Create Task Successfully", Data:[]byte{}}, nil
 }
 
-func ListTaskRequest(){}
-func EditRequst(){}
-func ListTodayRequest(){}
-func ListDayRequest(){}
-func ChangeStatusRequest(){}
+func (s Service) ListTaskRequest(request requestParam.ValuesListTask) (responseParam.Response, error){
+	
+	userTask, lErr := s.repository.List(request.UserID)
+	if lErr != nil{
+	
+		return responseParam.Response{StatusCode: 500, Message: "Failed to List Task", Data: []byte{}}, fmt.Errorf("error Listing task: %s", lErr.Error())
+	}
+
+	//fmt.Println(userTask)
+	data, mErr := json.Marshal(userTask)
+	if mErr != nil{
+		
+		return responseParam.Response{StatusCode: 500, Message: "Failed to List Task", Data: []byte{}}, fmt.Errorf("error Marshaling Response: %s", lErr.Error())
+	}
+	
+	return responseParam.Response{StatusCode: 200, Message: "Return List Task Successfully", Data: data}, nil
+}	
+
+func (s Service) EditTaskRequst(request requestParam.ValuesEditTask) (responseParam.Response, error){
+	eErr := s.repository.Edit(entity.Task{
+		ID: request.ID,
+		Title: request.Title,
+		DueDate: request.DueDate,
+		CategoryID: request.CategoryID,
+		IsComplete: request.IsComplete,
+		UserID: request.UserID,
+	})
+
+	if eErr != nil{
+		return responseParam.Response{StatusCode: 500, Message: "Failed to Edit Task", Data: []byte{}}, fmt.Errorf("error Editing task: %s", eErr.Error())
+	}
+
+	return responseParam.Response{StatusCode: 200, Message: "Edit Task Successfully", Data:[]byte{}}, nil
+}
+
+func (s Service) ListTodayRequest(request requestParam.ValueslistTodayTask) (responseParam.Response, error){
+	return responseParam.Response{}, nil
+}
+
+func (s Service) ListDayRequest(request requestParam.ValuesListSpecificDayTask)(responseParam.Response, error){
+	return responseParam.Response{}, nil
+}
+
+func (s Service) ChangeStatusRequest(request requestParam.ValuesChangeStatusTask)(responseParam.Response, error){
+	return responseParam.Response{}, nil
+}
 
 

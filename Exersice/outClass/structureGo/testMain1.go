@@ -5,7 +5,7 @@ import "fmt"
 func inMain(){
 	fmt.Println("you are in main")
 }
-func main(){
+func testtt(){
 	fmt.Println(a.B)
 	fmt.Println(a.A)
 

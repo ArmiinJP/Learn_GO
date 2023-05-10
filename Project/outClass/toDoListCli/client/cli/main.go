@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 	requestParam "todolist/delivery/requestParam"
+	responseParam "todolist/delivery/response"
+	"todolist/entity"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 	userCommand, userTarget := parsingFlag(*userCommandFlag, *targetServerFlag)
 
 	for {
-		dataRequest, cErr := completeCommand(userCommand /* inja task service*/)
+		dataRequest, cErr := completeCommand(userCommand)
 		if cErr != nil {
 			fmt.Println(cErr.Error())
 		} else {
@@ -29,7 +31,21 @@ func main() {
 				fmt.Println(sErr.Error())
 			}
 
-			fmt.Println(string(jsonResponse))
+			response := &responseParam.Response{}
+			uErr := json.Unmarshal(jsonResponse, response)
+			if uErr != nil{
+				fmt.Println(uErr.Error())
+			}
+			fmt.Println(*response)
+
+			dataInResponse := &[]entity.Task{}
+			uErr = json.Unmarshal(response.Data, dataInResponse)
+			if uErr != nil{
+				fmt.Println(uErr.Error())
+			}		
+			
+			fmt.Printf("status Code is: %d, Message is: %s, Data is: %+v", response.StatusCode, response.Message, *dataInResponse)
+
 		}
 
 		userCommand = giveUserCommand()
@@ -89,17 +105,13 @@ func completeCommand(userCommand string) ([]byte, error) {
 			return []byte{}, fmt.Errorf("\ncategory with id: %v is invalid", tmpCategoryidStr)
 		}
 
-		//working this line:
-		//newTask.UserID = 1
-
-		req := requestParam.CreateTask{
+		values, mErr := json.Marshal(requestParam.ValuesCreateTask{Title: newTask.Title,DueDate: newTask.DueDate,CategoryID: newTask.CategoryID,UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling create-task-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
 			Command: "create-task",
-			ValueCommand: requestParam.ValuesCreateTask{
-				Title:      newTask.Title,
-				DueDate:    newTask.DueDate,
-				CategoryID: newTask.CategoryID,
-				UserID:     1,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)
@@ -110,11 +122,13 @@ func completeCommand(userCommand string) ([]byte, error) {
 		return dataRequest, nil
 
 	case "list-task":
-		req := requestParam.ListTask{
+		values, mErr := json.Marshal(requestParam.ValuesListTask{UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling list-task-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
 			Command: "list-task",
-			ValueCommand: requestParam.ValuesListTask{
-				UserID: 1,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)
@@ -125,9 +139,58 @@ func completeCommand(userCommand string) ([]byte, error) {
 		return dataRequest, nil
 
 	case "list-today-task":
+	
 	case "list-day-task":
+	
 	case "edit-task":
+		var editTask = requestParam.ValuesEditTask{}
+		fmt.Println("\n---- Editing Task")
+
+		fmt.Printf("Please enter Task ID: ")
+		var tmpTaskIDStr string
+		fmt.Scanln(&tmpTaskIDStr)
+		tmpTaskIDInt, aErr := strconv.Atoi(tmpTaskIDStr)
+		if aErr != nil {
+
+			return []byte{}, fmt.Errorf("\ntask with id: %v is invalid", tmpTaskIDStr)
+		}
+		editTask.ID = tmpTaskIDInt
+		
+		fmt.Printf("if want Change Title, {Enter new Task Title}, else {Just Click Enter}: ")
+		fmt.Scanln(&editTask.Title)
+
+		fmt.Printf("if want Change DueDate, {Enter new Task DueDate}, else {Just Click Enter}: ")
+		fmt.Scanln(&editTask.DueDate)
+
+		fmt.Printf("if want Change Category, {Enter new Task CategoryID}, else {Just Click Enter}: ")
+		var tmpCategoryidStr string
+		fmt.Scanln(&tmpCategoryidStr)
+		tmpCategoryidint, aErr := strconv.Atoi(tmpCategoryidStr)
+		if aErr != nil {
+
+			return []byte{}, fmt.Errorf("\ncategory with id: %v is invalid", tmpCategoryidStr)
+		}
+		editTask.CategoryID = tmpCategoryidint
+
+
+		values, mErr := json.Marshal(requestParam.ValuesEditTask{ID: editTask.ID, Title: editTask.Title, DueDate: editTask.DueDate, CategoryID: editTask.CategoryID,IsComplete: false, UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling edit-task-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
+			Command: "edit-task",
+			ValueCommand: values,
+		}
+
+		dataRequest, jErr := json.Marshal(&req)
+		if jErr != nil {
+			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
+		}
+
+		return dataRequest, nil
+
 	case "task-complete":
+	
 	case "create-category":
 		var newCategory = requestParam.ValuesCreateCategory{}
 		fmt.Println("\n---- Creating Category")
@@ -139,14 +202,13 @@ func completeCommand(userCommand string) ([]byte, error) {
 		fmt.Scanln(&newCategory.Color)
 
 		//newCategory.UserID = authenticatedUser.ID
-
-		req := requestParam.CreateCategory{
+		values, mErr := json.Marshal(requestParam.ValuesCreateCategory{Title:  newCategory.Title,Color:  newCategory.Color,UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling create-category-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
 			Command: "create-category",
-			ValueCommand: requestParam.ValuesCreateCategory{
-				Title:  newCategory.Title,
-				Color:  newCategory.Color,
-				UserID: 1,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)
@@ -157,11 +219,13 @@ func completeCommand(userCommand string) ([]byte, error) {
 		return dataRequest, nil
 
 	case "list-category":
-		req := requestParam.ListCategory{
+		values, mErr := json.Marshal(requestParam.ValuesListCategory{UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling list-category-value: %s", mErr.Error())
+		}		
+		req := requestParam.Request{
 			Command: "list-category",
-			ValueCommand: requestParam.ValuesListCategory{
-				UserID: 1,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)
@@ -184,12 +248,14 @@ func completeCommand(userCommand string) ([]byte, error) {
 		fmt.Scanln(&newUser.Password)
 		//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
 
-		req := requestParam.RegisterUser{
+		values, mErr := json.Marshal(requestParam.ValuesRegisterUser{Email:    newUser.Email,Password: newUser.Password})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling register-user-value: %s", mErr.Error())
+		}
+
+		req := requestParam.Request{
 			Command: "register-User",
-			ValueCommand: requestParam.ValuesRegisterUser{
-				Email:    newUser.Email,
-				Password: newUser.Password,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)
@@ -211,12 +277,15 @@ func completeCommand(userCommand string) ([]byte, error) {
 		fmt.Scanln(&newUser.Password)
 		//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
 
-		req := requestParam.LoginUser{
+
+		values, mErr := json.Marshal(requestParam.ValuesLoginUser{Email:    newUser.Email,Password: newUser.Password})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling login-user-value: %s", mErr.Error())
+		}
+		
+		req := requestParam.Request{
 			Command: "login",
-			ValueCommand: requestParam.ValuesLoginUser{
-				Email:    newUser.Email,
-				Password: newUser.Password,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)
@@ -227,11 +296,13 @@ func completeCommand(userCommand string) ([]byte, error) {
 		return dataRequest, nil
 
 	case "whoami":
-		req := requestParam.Whoami{
+		values, mErr := json.Marshal(requestParam.ValuesWhoami{UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling whoami-value: %s", mErr.Error())
+		}		
+		req := requestParam.Request{
 			Command: "whoami",
-			ValueCommand: requestParam.ValuesWhoami{
-				UserID: 1,
-			},
+			ValueCommand: values,
 		}
 
 		dataRequest, jErr := json.Marshal(&req)

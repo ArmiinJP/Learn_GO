@@ -1,9 +1,8 @@
 package requestParam
 
-type CreateTask struct{
-	Command			string
-	ValueCommand	ValuesCreateTask
-}
+import (
+	"time"
+)
 
 type ValuesCreateTask struct {
 	Title		string
@@ -12,43 +11,34 @@ type ValuesCreateTask struct {
 	UserID		int
 }
 
-type ListTask struct{
-	Command			string
-	ValueCommand	ValuesListTask
-}
-
 type ValuesListTask struct {
 	UserID		int	
 }
 
-
-
-type ListTodayTask struct{
-	Command			string
-	ValueCommand	ValueslistTodayTask
+type ValueslistTodayTask struct{
+	UserID		int	
+	Date		time.Time
 }
-type ValueslistTodayTask struct{}
 
 
-
-type ListSpecificDayTask struct{
-	Command			string
-	ValueCommand	ValuesListSpecificDayTask
+type ValuesListSpecificDayTask struct{
+	UserID		int	
+	Date		time.Time
 }
-type ValuesListSpecificDayTask struct{}
 
 
-
-type EditTask struct{
-	Command			string
-	ValueCommand	ValuesEditTask
+type ValuesEditTask struct{
+	ID         int
+	Title      string
+	DueDate    string
+	CategoryID   int
+	IsComplete bool
+	UserID     int
 }
-type ValuesEditTask struct{}
 
 
-
-type ChangeStatusTask struct{
-	Command			string
-	ValueCommand	ValuesChangeStatusTask
+type ValuesChangeStatusTask struct{
+	ID         int
+	IsComplete bool
+	UserID     int
 }
-type ValuesChangeStatusTask struct{}

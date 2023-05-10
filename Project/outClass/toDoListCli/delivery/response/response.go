@@ -1,6 +1,7 @@
-package response
+package responseParam
 
-type Param struct{
+type Response struct{
 	StatusCode int
 	Message string
+	Data	[]byte
 }
