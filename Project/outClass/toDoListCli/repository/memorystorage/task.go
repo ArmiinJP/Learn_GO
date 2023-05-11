@@ -28,7 +28,7 @@ func (t TaskStorage) List(userID int) ([]entity.Task, error) {
 }
 
 func (t *TaskStorage) Edit(editedTask entity.Task) error {
-	for _, v := range t.tasks {
+	for i, v := range t.tasks {
 		if v.UserID == editedTask.UserID && v.ID == editedTask.ID {
 			if editedTask.CategoryID != 0 {
 				v.CategoryID = editedTask.CategoryID
@@ -39,6 +39,7 @@ func (t *TaskStorage) Edit(editedTask entity.Task) error {
 			if editedTask.Title != "" {
 				v.Title = editedTask.Title
 			}
+			t.tasks[i] = v
 		}
 	}
 
@@ -46,9 +47,10 @@ func (t *TaskStorage) Edit(editedTask entity.Task) error {
 }
 
 func (t *TaskStorage) ChangeStatus(editedTask entity.Task) error {
-	for _, v := range t.tasks {
+	for i, v := range t.tasks {
 		if v.UserID == editedTask.UserID && v.ID == editedTask.ID {
 			v.IsComplete = editedTask.IsComplete
+			t.tasks[i] = v
 		}
 	}
 

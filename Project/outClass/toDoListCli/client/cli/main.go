@@ -7,8 +7,9 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 	requestParam "todolist/delivery/requestParam"
-	responseParam "todolist/delivery/response"
+	responseParam "todolist/delivery/responseParam"
 	"todolist/entity"
 )
 
@@ -36,7 +37,6 @@ func main() {
 			if uErr != nil{
 				fmt.Println(uErr.Error())
 			}
-			fmt.Println(*response)
 
 			dataInResponse := &[]entity.Task{}
 			uErr = json.Unmarshal(response.Data, dataInResponse)
@@ -44,7 +44,12 @@ func main() {
 				fmt.Println(uErr.Error())
 			}		
 			
-			fmt.Printf("status Code is: %d, Message is: %s, Data is: %+v", response.StatusCode, response.Message, *dataInResponse)
+			fmt.Printf("status Code is: %d,\nMessage is: %s,\n", response.StatusCode, response.Message)
+			for i, v := range(*dataInResponse){
+				fmt.Printf("\ntask number %d is:-------------------\n", i+1)
+				fmt.Printf("User ID: %d\nTask ID: %d\nCategory ID: %d\nTask Title: %s\nTask Complete: %s\nTask DueDate: %s\n",
+					v.UserID, v.ID, v.CategoryID, v.Title, strconv.FormatBool(v.IsComplete), v.DueDate)
+			}			
 
 		}
 
@@ -120,7 +125,6 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "list-task":
 		values, mErr := json.Marshal(requestParam.ValuesListTask{UserID: 1})
 		if mErr != nil{
@@ -137,11 +141,48 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "list-today-task":
-	
+		values, mErr := json.Marshal(requestParam.ValueslistTodayTask{UserID: 1, Date: time.Now()})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling list-today-task-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
+			Command: "list-today-task",
+			ValueCommand: values,
+		}
+
+		dataRequest, jErr := json.Marshal(&req)
+		if jErr != nil {
+			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
+		}
+
+		return dataRequest, nil	
 	case "list-day-task":
-	
+		var day string
+		var format = "2006-01-02"
+		fmt.Println("\n---- list Specific Day Task")
+		fmt.Printf("Please Enter Specific Day (format: %s): ", format)
+		fmt.Scanln(&day)
+		userDate, pErr := time.Parse(format, day)
+		if pErr != nil{
+			return []byte{}, fmt.Errorf(pErr.Error())
+		}
+		
+		values, mErr := json.Marshal(requestParam.ValuesListSpecificDayTask{UserID: 1, Date: userDate})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling list-today-task-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
+			Command: "list-day-task",
+			ValueCommand: values,
+		}
+
+		dataRequest, jErr := json.Marshal(&req)
+		if jErr != nil {
+			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
+		}
+
+		return dataRequest, nil	
 	case "edit-task":
 		var editTask = requestParam.ValuesEditTask{}
 		fmt.Println("\n---- Editing Task")
@@ -165,13 +206,16 @@ func completeCommand(userCommand string) ([]byte, error) {
 		fmt.Printf("if want Change Category, {Enter new Task CategoryID}, else {Just Click Enter}: ")
 		var tmpCategoryidStr string
 		fmt.Scanln(&tmpCategoryidStr)
-		tmpCategoryidint, aErr := strconv.Atoi(tmpCategoryidStr)
-		if aErr != nil {
-
-			return []byte{}, fmt.Errorf("\ncategory with id: %v is invalid", tmpCategoryidStr)
+		if tmpCategoryidStr != ""{
+			tmpCategoryidint, aErr := strconv.Atoi(tmpCategoryidStr)
+			if aErr != nil {
+			
+				return []byte{}, fmt.Errorf("\ncategory with id: %v is invalid", tmpCategoryidStr)
+			}
+			editTask.CategoryID = tmpCategoryidint
+		} else {
+			editTask.CategoryID = 0
 		}
-		editTask.CategoryID = tmpCategoryidint
-
 
 		values, mErr := json.Marshal(requestParam.ValuesEditTask{ID: editTask.ID, Title: editTask.Title, DueDate: editTask.DueDate, CategoryID: editTask.CategoryID,IsComplete: false, UserID: 1})
 		if mErr != nil{
@@ -188,9 +232,42 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
+	case "change-status-task":
+		var editTask = requestParam.ValuesEditTask{}
+		fmt.Println("\n---- Change Status Task")
 
-	case "task-complete":
-	
+		fmt.Printf("Please enter Task ID: ")
+		var tmpTaskIDStr string
+		fmt.Scanln(&tmpTaskIDStr)
+		tmpTaskIDInt, aErr := strconv.Atoi(tmpTaskIDStr)
+		if aErr != nil {
+
+			return []byte{}, fmt.Errorf("\ntask with id: %v is invalid", tmpTaskIDStr)
+		}
+		editTask.ID = tmpTaskIDInt
+		
+		fmt.Printf("Is Task Complete (True/False): ")
+		fmt.Scanln(&editTask.IsComplete)
+		// boolValue, err := strconv.ParseBool(editTask.IsComplete)
+        // if err != nil {
+        //     log.Fatal(err)
+        // }
+
+		values, mErr := json.Marshal(requestParam.ValuesChangeStatusTask{ID: editTask.ID, UserID: 1, IsComplete: editTask.IsComplete})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling change-task-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
+			Command: "change-status-task",
+			ValueCommand: values,
+		}
+
+		dataRequest, jErr := json.Marshal(&req)
+		if jErr != nil {
+			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
+		}
+
+		return dataRequest, nil			
 	case "create-category":
 		var newCategory = requestParam.ValuesCreateCategory{}
 		fmt.Println("\n---- Creating Category")
@@ -217,7 +294,6 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "list-category":
 		values, mErr := json.Marshal(requestParam.ValuesListCategory{UserID: 1})
 		if mErr != nil{
@@ -234,7 +310,6 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "edit-category":
 	case "register-user":
 		newUser := requestParam.ValuesRegisterUser{}
@@ -264,7 +339,6 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "login":
 		newUser := requestParam.ValuesLoginUser{}
 		fmt.Println("\n----- Logging User ----- ")
@@ -294,7 +368,6 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "whoami":
 		values, mErr := json.Marshal(requestParam.ValuesWhoami{UserID: 1})
 		if mErr != nil{
@@ -311,12 +384,11 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		return dataRequest, nil
-
 	case "exit":
 		fmt.Println("App is Closed")
 		os.Exit(0)
 	default:
-		fmt.Printf("\n--- command %s is not found!!\n", userCommand)
+		return []byte{},fmt.Errorf("--- command %s is not found", userCommand)
 	}
 
 	return []byte{}, nil
