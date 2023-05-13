@@ -311,6 +311,40 @@ func completeCommand(userCommand string) ([]byte, error) {
 
 		return dataRequest, nil
 	case "edit-category":
+		var editCategory = requestParam.ValuesEditCategory{}
+		fmt.Println("\n---- Editing Category")
+
+		fmt.Printf("Please enter Category ID: ")
+		var tmpCatIDStr string
+		fmt.Scanln(&tmpCatIDStr)
+		tmpCatIDInt, aErr := strconv.Atoi(tmpCatIDStr)
+		if aErr != nil {
+
+			return []byte{}, fmt.Errorf("\ntask with id: %v is invalid", tmpCatIDStr)
+		}
+		editCategory.ID = tmpCatIDInt
+		
+		fmt.Printf("if want Change Title, {Enter new Category Title}, else {Just Click Enter}: ")
+		fmt.Scanln(&editCategory.Title)
+
+		fmt.Printf("if want Change Color Category, {Enter new Category Color}, else {Just Click Enter}: ")
+		fmt.Scanln(&editCategory.Color)
+
+		values, mErr := json.Marshal(requestParam.ValuesEditCategory{ID: editCategory.ID, Title: editCategory.Title, Color: editCategory.Color, UserID: 1})
+		if mErr != nil{
+			return []byte{}, fmt.Errorf("error Marshaling edit-category-value: %s", mErr.Error())
+		}
+		req := requestParam.Request{
+			Command: "edit-category",
+			ValueCommand: values,
+		}
+
+		dataRequest, jErr := json.Marshal(&req)
+		if jErr != nil {
+			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
+		}
+
+		return dataRequest, nil		
 	case "register-user":
 		newUser := requestParam.ValuesRegisterUser{}
 		fmt.Println("\n----- Registering User ----- ")

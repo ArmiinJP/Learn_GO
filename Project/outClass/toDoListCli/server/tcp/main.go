@@ -39,6 +39,7 @@ func main() {
 	}
 
 	var taskRepo = memorystorage.TaskStorage{}
+	var CategoryRepo = memorystorage.CategoryStorage{}
 	var taskService = taskservice.New(&taskRepo)
 
 	// netwroking
@@ -100,6 +101,7 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-create-request: %s", uErr.Error())
 		}
+
 
 		response, cErr := taskService.CreateTaskRequest(*createTaskRequest)
 		if cErr != nil {
