@@ -1,0 +1,20 @@
+In Go, comments play an important role in documenting code. They are used by the godoc command, which extracts these comments to create documentation about Go packages
+(godoc)
+A documentation comment should be a complete sentence that starts with the name of the thing being described and ends with a period.
+//Package weather period. 
+package weather
+//CurrentCondition condicion actual. 
+var CurrentCondition string
+//CurrentLocation condicion location.
+var CurrentLocation string
+//Forecast function forecast.
+func Forecast
+
+
+&copy; copyright icon
+&lt; <
+&gt; >
+&amp; &
+
+&
+

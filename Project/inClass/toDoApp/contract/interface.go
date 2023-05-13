@@ -1,6 +1,6 @@
 package contract
 
-import "session_2_2/entity"
+import "todolistapp/entity"
 
 type UserStoreWrite interface{
 	Save(u entity.User)
