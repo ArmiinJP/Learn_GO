@@ -14,6 +14,8 @@ type TaskRepo interface {
 	List(userID int) ([]entity.Task, error)
 	Edit(task entity.Task) error
 	ChangeStatus(editedTask entity.Task) error
+	DoesUserhaveTask(userID, taskID int) error
+	NewTaskIDGenerateForUser(userID int) (int, error) 
 }
 
 type Service struct {
@@ -25,7 +27,14 @@ func New(tr TaskRepo) Service {
 }
 
 func (s Service) CreateTaskRequest(request requestParam.ValuesCreateTask) (responseParam.Response, error) {
+	
+	NewTaskIDGenerate, nErr := s.repository.NewTaskIDGenerateForUser(request.UserID)
+	if nErr != nil{
+		return responseParam.Response{StatusCode: 404, Message: "Faild to create task", Data: []byte{}}, fmt.Errorf("%s", nErr.Error())
+	}
+
 	cErr := s.repository.Create(entity.Task{
+		TaskID: NewTaskIDGenerate,
 		Title:      request.Title,
 		DueDate:    request.DueDate,
 		CategoryID: request.CategoryID,
@@ -58,8 +67,14 @@ func (s Service) ListTaskRequest(request requestParam.ValuesListTask) (responseP
 }
 
 func (s Service) EditTaskRequst(request requestParam.ValuesEditTask) (responseParam.Response, error) {
+	
+	dErr := s.repository.DoesUserhaveTask(request.UserID, request.TaskID)
+	if dErr != nil{
+		return responseParam.Response{StatusCode: 404, Message: "Faild to Edit task", Data: []byte{}}, fmt.Errorf("User doesn't have Task ID: %d error: %s",request.TaskID ,dErr.Error())
+	}
+
 	eErr := s.repository.Edit(entity.Task{
-		ID:         request.ID,
+		TaskID:     request.TaskID,
 		Title:      request.Title,
 		DueDate:    request.DueDate,
 		CategoryID: request.CategoryID,
@@ -131,8 +146,14 @@ func (s Service) ListSpecificDayRequest(request requestParam.ValuesListSpecificD
 }	
 
 func (s Service) ChangeStatusRequest(request requestParam.ValuesChangeStatusTask) (responseParam.Response, error) {
+	
+	dErr := s.repository.DoesUserhaveTask(request.UserID, request.TaskID)
+	if dErr != nil{
+		return responseParam.Response{StatusCode: 404, Message: "Faild to Edit task", Data: []byte{}}, fmt.Errorf("User doesn't have Task ID: %d error: %s",request.TaskID ,dErr.Error())
+	}
+	
 	cErr := s.repository.ChangeStatus(entity.Task{
-		ID: request.ID,
+		TaskID: request.TaskID,
 		IsComplete: request.IsComplete,
 		UserID: request.UserID,
 	})

@@ -13,6 +13,7 @@ import (
 
 	"todolist/contract"
 	"todolist/entity"
+	"todolist/repository/filestorage"
 )
 
 var (
@@ -128,7 +129,7 @@ func RunCommand(userCommand string, writeUser contract.UserWriteStore) {
 	case "login":
 		LoginUser()
 	case "whoami":
-		fmt.Printf("\n you're ID is: %d, and you're Email is: %s\n", authenticatedUser.ID, authenticatedUser.Email)
+		fmt.Printf("\n you're ID is: %d, and you're Email is: %s\n", authenticatedUser.UserID, authenticatedUser.Email)
 	case "exit":
 		fmt.Println("App is Closed")
 		os.Exit(0)
@@ -173,7 +174,7 @@ func LoginUser() {
 
 	for _, user := range users {
 		if user.Email == newUser.Email && user.Password == newUser.Password {
-			newUser.ID = user.ID
+			newUser.UserID = user.UserID
 			authenticatedUser = &newUser
 			fmt.Println("\n----- Successfull Logging")
 		}
@@ -198,7 +199,7 @@ func RegisterUser(writeUser contract.UserWriteStore) {
 	newUser.Password = hashPassword([]byte(newUser.Password))
 	//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
 
-	newUser.ID = len(users) + 1
+	newUser.UserID = len(users) + 1
 
 	if err := writeUser.Save(newUser); err != nil {
 		fmt.Printf("\nRegister user Failed!!\n")
@@ -230,7 +231,7 @@ func CreateTask() {
 
 	CategoryFound := false
 	for _, cat := range Categoreis {
-		if cat.UserID == authenticatedUser.ID && cat.ID == tmpCategoryidInt {
+		if cat.UserID == authenticatedUser.UserID && cat.CategoryID == tmpCategoryidInt {
 			newTask.CategoryID = tmpCategoryidInt
 			CategoryFound = true
 			break
@@ -242,9 +243,9 @@ func CreateTask() {
 		return
 	}
 
-	newTask.ID = len(Tasks) + 1
+	newTask.TaskID = len(Tasks) + 1
 	newTask.IsComplete = false
-	newTask.UserID = authenticatedUser.ID
+	newTask.UserID = authenticatedUser.UserID
 
 	Tasks = append(Tasks, newTask)
 	fmt.Println("Task Successfully Added")
@@ -252,7 +253,7 @@ func CreateTask() {
 
 func ListTask() {
 	for _, v := range Tasks {
-		if v.UserID == authenticatedUser.ID {
+		if v.UserID == authenticatedUser.UserID {
 			fmt.Println("----------\ntask name is:", v.Title,
 				"\ntask category ID is:", v.CategoryID,
 				"\ntask dueDate is:", v.DueDate,
@@ -269,8 +270,8 @@ func CreateCategory() {
 	fmt.Scanln(&newCategory.Title)
 	fmt.Printf("Please enter Category Color: ")
 	fmt.Scanln(&newCategory.Color)
-	newCategory.ID = len(Categoreis) + 1
-	newCategory.UserID = authenticatedUser.ID
+	newCategory.CategoryID = len(Categoreis) + 1
+	newCategory.UserID = authenticatedUser.UserID
 
 	Categoreis = append(Categoreis, newCategory)
 	fmt.Println("Category Successfully Added")
@@ -278,9 +279,9 @@ func CreateCategory() {
 
 func ListCategory() {
 	for _, v := range Categoreis {
-		if v.UserID == authenticatedUser.ID {
+		if v.UserID == authenticatedUser.UserID {
 			fmt.Println("Category name is:", v.Title,
-				"\nCategory ID is:", v.ID,
+				"\nCategory ID is:", v.CategoryID,
 				"\nCategory Color is:", v.Color)
 		}
 	}

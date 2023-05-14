@@ -12,7 +12,8 @@ type CategoryRepo interface {
 	Create(category entity.Category) error
 	List(userID int) ([]entity.Category, error)
 	Edit(task entity.Category) error
-	DoesUserhaveCategory(userID, categoryID int) bool
+	DoesUserhaveCategory(userID, categoryID int) error
+	NewCategoryIDGenerateForUser(userID int) (int, error) 	
 }
 
 type Service struct {
@@ -24,12 +25,19 @@ func New(cr CategoryRepo) Service {
 }
 
 func (s Service) CreateCategoryRequest(request requestParam.ValuesCreateCategory) (responseParam.Response, error) {
+	
+	NewCategoryIDGenerate, nErr := s.repository.NewCategoryIDGenerateForUser(request.UserID)
+	if nErr != nil{
+		return responseParam.Response{StatusCode: 404, Message: "Faild to create category", Data: []byte{}}, fmt.Errorf("%s", nErr.Error())
+	}
+	
 	cErr := s.repository.Create(entity.Category{
-		ID:     2,
-		Title:  request.Title,
-		Color:  request.Color,
-		UserID: request.UserID,
+		CategoryID: NewCategoryIDGenerate,
+		Title:      request.Title,
+		Color:      request.Color,
+		UserID:     request.UserID,
 	})
+
 	if cErr != nil {
 		return responseParam.Response{StatusCode: 500, Message: "Failed to Create Category", Data: []byte{}}, fmt.Errorf("error Creating Category: %s", cErr.Error())
 	}
@@ -56,10 +64,16 @@ func (s Service) ListCategoryRequest(request requestParam.ValuesListCategory) (r
 }
 
 func (s Service) EditCategoryRequst(request requestParam.ValuesEditCategory) (responseParam.Response, error) {
+	
+	dErr := s.repository.DoesUserhaveCategory(request.UserID, request.CategoryID)
+	if dErr != nil{
+		return responseParam.Response{StatusCode: 404, Message: "Faild to Edit category", Data: []byte{}}, fmt.Errorf("user doesn't have category ID: %d error: %s",request.CategoryID ,dErr.Error())
+	}
+
 	eErr := s.repository.Edit(entity.Category{
-		ID:         request.ID,
+		CategoryID: request.CategoryID,
 		Title:      request.Title,
-		Color:    	request.Color,
+		Color:      request.Color,
 		UserID:     request.UserID,
 	})
 
@@ -69,9 +83,3 @@ func (s Service) EditCategoryRequst(request requestParam.ValuesEditCategory) (re
 
 	return responseParam.Response{StatusCode: 200, Message: "Edit Category Successfully", Data: []byte{}}, nil
 }
-
-func (s Service) DoesUserhaveCategory(UserID int, CategoryID int) error{
-	dErr := s.DoesUserhaveCategory(UserID, CategoryID)
-	return dErr
-}
-

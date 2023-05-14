@@ -1,10 +1,10 @@
 package entity
 
 type Task struct {
-	ID         int
+	TaskID     int
 	Title      string
 	DueDate    string
-	CategoryID   int
+	CategoryID int
 	IsComplete bool
 	UserID     int
 }

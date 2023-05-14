@@ -12,7 +12,9 @@ import (
 	"todolist/delivery/requestParam"
 	"todolist/entity"
 	"todolist/repository/filestorage"
-	"todolist/repository/memorystorage"
+	"todolist/repository/memorystorage/categorystorage"
+	"todolist/repository/memorystorage/taskstorage"
+	categoryservice "todolist/service/category"
 	taskservice "todolist/service/task"
 )
 
@@ -21,7 +23,6 @@ var (
 )
 
 func main() {
-
 	userAddressflag := flag.String("address", ":2023", "enter server Address(IP:PORT)")
 	serialFlagUser := flag.String("serialized", "", "enter your format to save file")
 	flag.Parse()
@@ -38,8 +39,10 @@ func main() {
 		users = append(users, usersStorage...)
 	}
 
-	var taskRepo = memorystorage.TaskStorage{}
-	var CategoryRepo = memorystorage.CategoryStorage{}
+	var taskRepo = taskstorage.New()
+	var CategoryRepo = categorystorage.New()
+	
+	var categoryService = categoryservice.New(&CategoryRepo)
 	var taskService = taskservice.New(&taskRepo)
 
 	// netwroking
@@ -73,7 +76,7 @@ func main() {
 			continue
 		}
 
-		dataResponse, pErr := processRequest(request, taskService)
+		dataResponse, pErr := processRequest(request, taskService, categoryService)
 		if pErr != nil {
 			log.Println("Error Processing request: ", pErr.Error())
 
@@ -92,18 +95,18 @@ func main() {
 
 }
 
-func processRequest(req requestParam.Request, taskService taskservice.Service) ([]byte, error) {
+func processRequest(req requestParam.Request, taskService taskservice.Service, categoryService categoryservice.Service) ([]byte, error) {
 	switch req.Command {
 	case "create-task":
-		createTaskRequest := &requestParam.ValuesCreateTask{}
-		uErr := json.Unmarshal(req.ValueCommand, createTaskRequest)
+		createTaskRequestParam := &requestParam.ValuesCreateTask{}
+		uErr := json.Unmarshal(req.ValueCommand, createTaskRequestParam)
 		if uErr != nil {
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-create-request: %s", uErr.Error())
 		}
 
-
-		response, cErr := taskService.CreateTaskRequest(*createTaskRequest)
+		response, cErr := taskService.CreateTaskRequest(*createTaskRequestParam)
+		
 		if cErr != nil {
 
 			return []byte{}, fmt.Errorf("error in service create-task-request: %s", cErr.Error())
@@ -117,14 +120,14 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 
 		return dataResponse, nil
 	case "list-task":
-		listTaskRequest := &requestParam.ValuesListTask{}
-		uErr := json.Unmarshal(req.ValueCommand, listTaskRequest)
+		listTaskRequestParam := &requestParam.ValuesListTask{}
+		uErr := json.Unmarshal(req.ValueCommand, listTaskRequestParam)
 		if uErr != nil {
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-list-request: %s", uErr.Error())
 		}
 
-		response, cErr := taskService.ListTaskRequest(*listTaskRequest)
+		response, cErr := taskService.ListTaskRequest(*listTaskRequestParam)
 		if cErr != nil {
 
 			return []byte{}, fmt.Errorf("error in service list-task-request: %s", cErr.Error())
@@ -138,14 +141,14 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 
 		return dataResponse, nil
 	case "list-today-task":
-		listTodayTaskRequest := &requestParam.ValueslistTodayTask{}
-		uErr := json.Unmarshal(req.ValueCommand, listTodayTaskRequest)
+		listTodayTaskRequestParam := &requestParam.ValueslistTodayTask{}
+		uErr := json.Unmarshal(req.ValueCommand, listTodayTaskRequestParam)
 		if uErr != nil {
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-list-today-request: %s", uErr.Error())
 		}
 
-		response, cErr := taskService.ListTodayRequest(*listTodayTaskRequest)
+		response, cErr := taskService.ListTodayRequest(*listTodayTaskRequestParam)
 		if cErr != nil {
 
 			return []byte{}, fmt.Errorf("error in service list-today-task-request: %s", cErr.Error())
@@ -157,16 +160,16 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 			return []byte{}, fmt.Errorf("error Marshaling response %s", mErr.Error())
 		}
 
-		return dataResponse, nil		
+		return dataResponse, nil
 	case "list-day-task":
-		listSpecificDayTaskRequest := &requestParam.ValuesListSpecificDayTask{}
-		uErr := json.Unmarshal(req.ValueCommand, listSpecificDayTaskRequest)
+		listSpecificDayTaskRequestParam := &requestParam.ValuesListSpecificDayTask{}
+		uErr := json.Unmarshal(req.ValueCommand, listSpecificDayTaskRequestParam)
 		if uErr != nil {
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-list-specific-day-request: %s", uErr.Error())
 		}
 
-		response, cErr := taskService.ListSpecificDayRequest(*listSpecificDayTaskRequest)
+		response, cErr := taskService.ListSpecificDayRequest(*listSpecificDayTaskRequestParam)
 		if cErr != nil {
 
 			return []byte{}, fmt.Errorf("error in service list-specific-day-task-request: %s", cErr.Error())
@@ -178,16 +181,16 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 			return []byte{}, fmt.Errorf("error Marshaling response %s", mErr.Error())
 		}
 
-		return dataResponse, nil	
+		return dataResponse, nil
 	case "edit-task":
-		editTaskRequest := &requestParam.ValuesEditTask{}
-		uErr := json.Unmarshal(req.ValueCommand, editTaskRequest)
+		editTaskRequestParam := &requestParam.ValuesEditTask{}
+		uErr := json.Unmarshal(req.ValueCommand, editTaskRequestParam)
 		if uErr != nil {
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-edit-request: %s", uErr.Error())
 		}
 
-		response, cErr := taskService.EditTaskRequst(*editTaskRequest)
+		response, cErr := taskService.EditTaskRequst(*editTaskRequestParam)
 		if cErr != nil {
 
 			return []byte{}, fmt.Errorf("error in service edit-task-request: %s", cErr.Error())
@@ -201,14 +204,14 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 
 		return dataResponse, nil
 	case "change-status-task":
-		changeStatusTaskReuquest := &requestParam.ValuesChangeStatusTask{}
-		uErr := json.Unmarshal(req.ValueCommand, changeStatusTaskReuquest)
+		changeStatusTaskReuquestParam := &requestParam.ValuesChangeStatusTask{}
+		uErr := json.Unmarshal(req.ValueCommand, changeStatusTaskReuquestParam)
 		if uErr != nil {
 
 			return []byte{}, fmt.Errorf("error unmarshaling value-change-status-request: %s", uErr.Error())
 		}
 
-		response, cErr := taskService.ChangeStatusRequest(*changeStatusTaskReuquest)
+		response, cErr := taskService.ChangeStatusRequest(*changeStatusTaskReuquestParam)
 		if cErr != nil {
 
 			return []byte{}, fmt.Errorf("error in service change-status-task-request: %s", cErr.Error())
@@ -220,122 +223,73 @@ func processRequest(req requestParam.Request, taskService taskservice.Service) (
 			return []byte{}, fmt.Errorf("error Marshaling response %s", mErr.Error())
 		}
 
-		return dataResponse, nil		
+		return dataResponse, nil
 	case "create-category":
-		var newCategory = requestParam.ValuesCreateCategory{}
-		fmt.Println("\n---- Creating Category")
+		createCategoryRequestParam := &requestParam.ValuesCreateCategory{}
+		uErr := json.Unmarshal(req.ValueCommand, createCategoryRequestParam)
+		if uErr != nil {
 
-		fmt.Printf("Please enter Category Title: ")
-		fmt.Scanln(&newCategory.Title)
+			return []byte{}, fmt.Errorf("error unmarshaling value-create-category-request: %s", uErr.Error())
+		}
 
-		fmt.Printf("Please enter Category Color: ")
-		fmt.Scanln(&newCategory.Color)
+		response, cErr := categoryService.CreateCategoryRequest(*createCategoryRequestParam)
+		if cErr != nil {
 
-		//newCategory.UserID = authenticatedUser.ID
-		values, mErr := json.Marshal(requestParam.ValuesCreateCategory{Title: newCategory.Title, Color: newCategory.Color, UserID: 1})
+			return []byte{}, fmt.Errorf("error in service create-category-request: %s", cErr.Error())
+		}
+
+		dataResponse, mErr := json.Marshal(response)
 		if mErr != nil {
-			return []byte{}, fmt.Errorf("error Marshaling create-category-value: %s", mErr.Error())
-		}
-		req := requestParam.Request{
-			Command:      "create-category",
-			ValueCommand: values,
+
+			return []byte{}, fmt.Errorf("error Marshaling response %s", mErr.Error())
 		}
 
-		dataRequest, jErr := json.Marshal(&req)
-		if jErr != nil {
-			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
-		}
-
-		return dataRequest, nil
+		return dataResponse, nil
 	case "list-category":
-		values, mErr := json.Marshal(requestParam.ValuesListCategory{UserID: 1})
+		listCategoryRequestParam := &requestParam.ValuesListCategory{}
+		uErr := json.Unmarshal(req.ValueCommand, listCategoryRequestParam)
+		if uErr != nil {
+
+			return []byte{}, fmt.Errorf("error unmarshaling value-list-request: %s", uErr.Error())
+		}
+
+		response, cErr := categoryService.ListCategoryRequest(requestParam.ValuesListCategory(*listCategoryRequestParam))
+		if cErr != nil {
+
+			return []byte{}, fmt.Errorf("error in service list-task-request: %s", cErr.Error())
+		}
+
+		dataResponse, mErr := json.Marshal(response)
 		if mErr != nil {
-			return []byte{}, fmt.Errorf("error Marshaling list-category-value: %s", mErr.Error())
-		}
-		req := requestParam.Request{
-			Command:      "list-category",
-			ValueCommand: values,
+
+			return []byte{}, fmt.Errorf("error Marshaling response %s", mErr.Error())
 		}
 
-		dataRequest, jErr := json.Marshal(&req)
-		if jErr != nil {
-			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
-		}
-
-		return dataRequest, nil	
+		return dataResponse, nil
 	case "edit-category":
+		editCategoryRequestParam := &requestParam.ValuesEditCategory{}
+		uErr := json.Unmarshal(req.ValueCommand, editCategoryRequestParam)
+		if uErr != nil {
+
+			return []byte{}, fmt.Errorf("error unmarshaling value-edit-category-request: %s", uErr.Error())
+		}
+
+		response, cErr := categoryService.EditCategoryRequst(*editCategoryRequestParam)
+		if cErr != nil {
+
+			return []byte{}, fmt.Errorf("error in service edit-category-request: %s", cErr.Error())
+		}
+
+		dataResponse, mErr := json.Marshal(response)
+		if mErr != nil {
+
+			return []byte{}, fmt.Errorf("error Marshaling response %s", mErr.Error())
+		}
+
+		return dataResponse, nil
 	case "register-user":
-		newUser := requestParam.ValuesRegisterUser{}
-		fmt.Println("\n----- Registering User ----- ")
-
-		fmt.Printf("Please enter your Email: ")
-		fmt.Scanln(&newUser.Email)
-		//isEmpty, _ = fmt.Scanln(&newUser.Email) //check input
-
-		fmt.Printf("Please enter your Password: ")
-		fmt.Scanln(&newUser.Password)
-		//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
-
-		values, mErr := json.Marshal(requestParam.ValuesRegisterUser{Email: newUser.Email, Password: newUser.Password})
-		if mErr != nil {
-			return []byte{}, fmt.Errorf("error Marshaling register-user-value: %s", mErr.Error())
-		}
-
-		req := requestParam.Request{
-			Command:      "register-User",
-			ValueCommand: values,
-		}
-
-		dataRequest, jErr := json.Marshal(&req)
-		if jErr != nil {
-			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
-		}
-
-		return dataRequest, nil
 	case "login":
-		newUser := requestParam.ValuesLoginUser{}
-		fmt.Println("\n----- Logging User ----- ")
-
-		fmt.Printf("Please enter your Email: ")
-		fmt.Scanln(&newUser.Email)
-		//isEmpty, _ = fmt.Scanln(&newUser.Email) //check input
-
-		fmt.Printf("Please enter your Password: ")
-		fmt.Scanln(&newUser.Password)
-		//isEmpty, _ = fmt.Scanln(&newUser.Password) //check input
-
-		values, mErr := json.Marshal(requestParam.ValuesLoginUser{Email: newUser.Email, Password: newUser.Password})
-		if mErr != nil {
-			return []byte{}, fmt.Errorf("error Marshaling login-user-value: %s", mErr.Error())
-		}
-
-		req := requestParam.Request{
-			Command:      "login",
-			ValueCommand: values,
-		}
-
-		dataRequest, jErr := json.Marshal(&req)
-		if jErr != nil {
-			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
-		}
-
-		return dataRequest, nil
 	case "whoami":
-		values, mErr := json.Marshal(requestParam.ValuesWhoami{UserID: 1})
-		if mErr != nil {
-			return []byte{}, fmt.Errorf("error Marshaling whoami-value: %s", mErr.Error())
-		}
-		req := requestParam.Request{
-			Command:      "whoami",
-			ValueCommand: values,
-		}
-
-		dataRequest, jErr := json.Marshal(&req)
-		if jErr != nil {
-			return []byte{}, fmt.Errorf("error in Marshaling data: %s", jErr.Error())
-		}
-
-		return dataRequest, nil
 	case "exit":
 		fmt.Println("App is Closed")
 		os.Exit(0)
