@@ -8,8 +8,9 @@ type ValuesRegisterUser struct{
 type ValuesLoginUser struct{
 	Email string
 	Password string	
+	RemoteAddr string
 }
 
 type ValuesWhoami struct{
-	UserID int
+	RemoteAddr string
 }

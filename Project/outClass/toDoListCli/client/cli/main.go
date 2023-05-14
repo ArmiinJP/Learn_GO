@@ -11,6 +11,7 @@ import (
 	requestParam "todolist/delivery/requestParam"
 	responseParam "todolist/delivery/responseParam"
 	"todolist/entity"
+	//"todolist/entity"
 )
 
 func main() {
@@ -38,21 +39,27 @@ func main() {
 				fmt.Println(uErr.Error())
 			}
 
-			dataInResponse := &[]entity.Task{}
-			uErr = json.Unmarshal(response.Data, dataInResponse)
-			if uErr != nil {
-				fmt.Println(uErr.Error())
-			}
+			fmt.Println(response.StatusCode)
+			fmt.Println(response.Message)
+			fmt.Println(response.Data)
+			var test = &[]entity.Task{}
+			json.Unmarshal(response.Data, test)
+			fmt.Println(test)
 
-			fmt.Printf("status Code is: %d,\nMessage is: %s,\n", response.StatusCode, response.Message)
-			for i, v := range *dataInResponse {
-				fmt.Printf("\ntask number %d is:-------------------\n", i+1)
-				fmt.Printf("User ID: %d\nTask ID: %d\nCategory ID: %d\nTask Title: %s\nTask Complete: %s\nTask DueDate: %s\n",
-					v.UserID, v.TaskID, v.CategoryID, v.Title, strconv.FormatBool(v.IsComplete), v.DueDate)
-			}
+			// dataInResponse := &[]entity.Task{}
+			// uErr = json.Unmarshal(response.Data, dataInResponse)
+			// if uErr != nil {
+			// 	fmt.Println(uErr.Error())
+			// }
+
+			// fmt.Printf("status Code is: %d,\nMessage is: %s,\n", response.StatusCode, response.Message)
+			// for i, v := range *dataInResponse {
+			// 	fmt.Printf("\ntask number %d is:-------------------\n", i+1)
+			// 	fmt.Printf("User ID: %d\nTask ID: %d\nCategory ID: %d\nTask Title: %s\nTask Complete: %s\nTask DueDate: %s\n",
+			// 		v.UserID, v.TaskID, v.CategoryID, v.Title, strconv.FormatBool(v.IsComplete), v.DueDate)
+			// }
 
 		}
-
 		userCommand = giveUserCommand()
 	}
 }
@@ -362,7 +369,7 @@ func completeCommand(userCommand string) ([]byte, error) {
 		}
 
 		req := requestParam.Request{
-			Command:      "register-User",
+			Command:      "register-user",
 			ValueCommand: values,
 		}
 
@@ -401,7 +408,7 @@ func completeCommand(userCommand string) ([]byte, error) {
 
 		return dataRequest, nil
 	case "whoami":
-		values, mErr := json.Marshal(requestParam.ValuesWhoami{UserID: 1})
+		values, mErr := json.Marshal(requestParam.ValuesWhoami{})
 		if mErr != nil {
 			return []byte{}, fmt.Errorf("error Marshaling whoami-value: %s", mErr.Error())
 		}
@@ -423,7 +430,7 @@ func completeCommand(userCommand string) ([]byte, error) {
 		return []byte{}, fmt.Errorf("--- command %s is not found", userCommand)
 	}
 
-	return []byte{}, nil
+	return []byte{}, fmt.Errorf("error in switch case")
 }
 
 func socketLayer(data []byte, target string) ([]byte, error) {

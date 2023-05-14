@@ -3,28 +3,28 @@ package taskstorage
 import (
 	"fmt"
 	"strconv"
-	
-	"todolist/entity"
+
 	"todolist/constant"
+	"todolist/entity"
 )
 
-type TaskStorage struct {
+type storage struct {
 	tasks map[int][]entity.Task
 }
 
-func New() TaskStorage {
-	return TaskStorage{
+func New() storage {
+	return storage{
 		tasks: make(map[int][]entity.Task),
 	}
 }
 
-func (t *TaskStorage) Create(newTask entity.Task) error {
-	
+func (t *storage) Create(newTask entity.Task) error {
+
 	t.tasks[newTask.UserID] = append(t.tasks[newTask.UserID], newTask)
 	return nil
 }
 
-func (t TaskStorage) List(userID int) ([]entity.Task, error) {
+func (t storage) List(userID int) ([]entity.Task, error) {
 	for user, userTask := range t.tasks {
 		if user == userID {
 			return userTask, nil
@@ -34,10 +34,10 @@ func (t TaskStorage) List(userID int) ([]entity.Task, error) {
 	return []entity.Task{}, fmt.Errorf("user doesn't have any task")
 }
 
-func (t *TaskStorage) Edit(editedTask entity.Task) error {
+func (t *storage) Edit(editedTask entity.Task) error {
 	for user, userTask := range t.tasks {
 		if user == editedTask.UserID {
-			for i, task := range userTask{
+			for i, task := range userTask {
 				if task.TaskID == editedTask.TaskID {
 					if editedTask.CategoryID != 0 {
 						task.CategoryID = editedTask.CategoryID
@@ -58,10 +58,10 @@ func (t *TaskStorage) Edit(editedTask entity.Task) error {
 	return nil
 }
 
-func (t *TaskStorage) ChangeStatus(editedTask entity.Task) error {
+func (t *storage) ChangeStatus(editedTask entity.Task) error {
 	for user, userTask := range t.tasks {
 		if user == editedTask.UserID {
-			for i, task := range userTask{
+			for i, task := range userTask {
 				if task.TaskID == editedTask.TaskID {
 					if editedTask.IsComplete == true || editedTask.IsComplete == false {
 						task.IsComplete = editedTask.IsComplete
@@ -77,40 +77,40 @@ func (t *TaskStorage) ChangeStatus(editedTask entity.Task) error {
 	return nil
 }
 
-func (t TaskStorage) Print() {
-	fmt.Println("All Task is: -------------------------")
+func (t storage) DoesUserhaveTask(userID, taskID int) error {
 	for user, userTask := range t.tasks {
-		for _, task := range userTask{
-			fmt.Printf("User ID: %d\nTask ID: %d\nCategory ID: %d\nTask Title: %s\nTask Complete: %s\nTask DueDate: %s\n",
-				user, task.TaskID, task.CategoryID, task.Title, strconv.FormatBool(task.IsComplete), task.DueDate)
-		}			
-	}
-}
-
-func (t TaskStorage) DoesUserhaveTask(userID, taskID int) error{
-	for user, userTask := range t.tasks{
 		if user == userID {
-			for _, task := range userTask{
-				if task.TaskID == taskID{
+			for _, task := range userTask {
+				if task.TaskID == taskID {
 					return nil
 				}
 			}
 		}
 	}
-		
+
 	return fmt.Errorf("user: %d doesn't have task ID: %d", userID, taskID)
 }
 
-func (t TaskStorage) NewTaskIDGenerateForUser(userID int) (int, error){
-	for user, userTask := range t.tasks{
-		if user == userID{
+func (t storage) NewTaskIDGenerateForUser(userID int) (int, error) {
+	for user, userTask := range t.tasks {
+		if user == userID {
 			newID := constant.MinTaskIDEachUser + len(userTask) + 1
-			if newID < constant.MaxTaskIDEachUser{
+			if newID < constant.MaxTaskIDEachUser {
 				return newID, nil
-			} else{
+			} else {
 				return 0, fmt.Errorf("user dosen't allow add new task, task capacity is full")
 			}
 		}
 	}
 	return 0, nil
+}
+
+func (t storage) Print() {
+	fmt.Println("All Task is: -------------------------")
+	for user, userTask := range t.tasks {
+		for _, task := range userTask {
+			fmt.Printf("User ID: %d\nTask ID: %d\nCategory ID: %d\nTask Title: %s\nTask Complete: %s\nTask DueDate: %s\n",
+				user, task.TaskID, task.CategoryID, task.Title, strconv.FormatBool(task.IsComplete), task.DueDate)
+		}
+	}
 }

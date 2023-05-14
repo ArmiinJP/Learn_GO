@@ -6,34 +6,34 @@ import (
 	"todolist/entity"
 )
 
-type CategoryStorage struct {
+type storage struct {
 	categories map[int][]entity.Category
 }
 
-func New() CategoryStorage {
-	return CategoryStorage{
+func New() storage {
+	return storage{
 		categories: make(map[int][]entity.Category),
 	}
 }
 
-func (c *CategoryStorage) Create(category entity.Category) error {
+func (c *storage) Create(category entity.Category) error {
 
 	c.categories[category.UserID] = append(c.categories[category.UserID], category)
 	return nil
 }
 
-func (c CategoryStorage) List(userID int) ([]entity.Category, error) {
-	var tmpCategories = []entity.Category{}
+func (c storage) List(userID int) ([]entity.Category, error) {
+	
 	for user, userCategory := range c.categories {
 		if user == userID {
 			return userCategory, nil
 		}
 	}
 
-	return tmpCategories, nil
+	return []entity.Category{}, fmt.Errorf("user doesn't have any Cateogry")
 }
 
-func (c *CategoryStorage) Edit(category entity.Category) error {
+func (c *storage) Edit(category entity.Category) error {
 	for user, userCategory := range c.categories {
 		if user == category.UserID {
 			for i, catValue := range userCategory {
@@ -52,7 +52,7 @@ func (c *CategoryStorage) Edit(category entity.Category) error {
 	return nil
 }
 
-func (c CategoryStorage) DoesUserhaveCategory(userID, categoryID int) error {
+func (c storage) DoesUserhaveCategory(userID, categoryID int) error {
 	for user, userCategory := range c.categories {
 		if user == userID {
 			for _, category := range userCategory {
@@ -66,7 +66,7 @@ func (c CategoryStorage) DoesUserhaveCategory(userID, categoryID int) error {
 	return fmt.Errorf("user: %d doesn't have category ID: %d", userID, categoryID)
 }
 
-func (c CategoryStorage) NewCategoryIDGenerateForUser(userID int) (int, error) {
+func (c storage) NewCategoryIDGenerateForUser(userID int) (int, error) {
 	for user, userCategory := range c.categories {
 		if user == userID {
 			newID := constant.MinCategoryIDEachUser + len(userCategory) + 1
@@ -77,5 +77,15 @@ func (c CategoryStorage) NewCategoryIDGenerateForUser(userID int) (int, error) {
 			}
 		}
 	}
-	return 0, nil
+	return 0, fmt.Errorf("error generating category id")
+}
+
+func (c storage) Print() {
+	fmt.Println("All Category is: -------------------------")
+	for user, userCategory := range  c.categories{
+		for _, category := range userCategory {
+			fmt.Printf("User ID: %d\nCategory ID: %d\nCategory Title: %s\nCategory Color: %s\n",
+				user, category.CategoryID, category.Color, category.Title)
+		}
+	}
 }
