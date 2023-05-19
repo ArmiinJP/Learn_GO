@@ -37,8 +37,17 @@ func (s storage) NewUserIDGenerate() (int, error) {
 	return newID, nil
 }
 
-// func (s storage) Print(){
-// 	for _, user := range s.users{
-// 		fmt.Printf("User ID is: %d\nEmail is: %s\nPassword is: %s \n", user.UserID, user.Email, user.Password)
-// 	}
-// }
+func (s storage) ReturnUserID(user entity.User) (int, error){
+	for _, u := range s.users{
+		if u.Email == user.Email && u.Password == user.Password{
+			return u.UserID, nil
+		}
+	}
+	return 0, fmt.Errorf("user with this information not exist")
+}
+
+func (s storage) Print(){
+	for _, user := range s.users{
+		fmt.Printf("User ID is: %d\nEmail is: %s\nPassword is: %s \n", user.UserID, user.Email, user.Password)
+	}
+}

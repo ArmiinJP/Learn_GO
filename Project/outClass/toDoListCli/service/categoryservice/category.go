@@ -16,7 +16,7 @@ type categoryRepo interface {
 	NewCategoryIDGenerateForUser(userID int) (int, error) 	
 
 	// for testing server
-	//Print()	
+	Print()	
 }
 
 type Service struct {
@@ -97,6 +97,6 @@ func (s Service) CheckCategoryID(userID, categoryID int) (responseParam.Response
 	return responseParam.Response{}, nil
 }
 
-// func (s Service) Print(){
-// 	s.repository.Print()
-// }
+func (s Service) Print(){
+	s.repository.Print()
+}

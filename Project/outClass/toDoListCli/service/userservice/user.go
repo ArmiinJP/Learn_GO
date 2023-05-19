@@ -4,18 +4,21 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"fmt"
+
 	"todolist/delivery/requestParam"
 	"todolist/delivery/responseParam"
 	"todolist/entity"
+	"todolist/service/loggeduserservice"
 )
 
 type userRepo interface {
 	AddUser(entity.User) error
 	CheckDuplicateInfo(entity.User) error
 	NewUserIDGenerate() (int, error) 	
-
+	ReturnUserID(entity.User) (int, error)
+	
 	// for testing server
-	//Print()
+	Print()
 }
 
 type Service struct {
@@ -52,7 +55,27 @@ func (s Service) RegisterUser(req requestParam.ValuesRegisterUser) (responsePara
 	return responseParam.Response{StatusCode: 200, Message: "Register User Successfully", Data: []byte{}}, nil
 }
 
-func (s Service) LoginUser()  {}
+func (s Service) LoginUser(req requestParam.ValuesLoginUser, ls loggeduserservice.Service)(responseParam.Response, error){
+	
+	userID, rErr := s.repository.ReturnUserID(entity.User{
+		Email: req.Email,
+		Password: s.hashPassword([]byte(req.Password)),
+	})
+	if rErr != nil{
+		return responseParam.Response{StatusCode: 400, Message: "The information is False, Please Check Username and Password"}, fmt.Errorf("%s", rErr.Error())
+	}
+
+	response, aErr := ls.AddLoggedInUser(requestParam.ValuesAddUserLoggedIn{
+		RemoteAddress: req.RemoteAddr,
+		UserID: userID,
+	})
+	if aErr != nil{
+		return response, fmt.Errorf("%s", aErr.Error())
+	}
+
+	return response, nil
+}
+
 func (s Service) LogoutUser() {}
 func (s Service) WhichUser()  {}
 
@@ -65,6 +88,6 @@ func (s Service) hashPassword(password []byte) string {
 	return encodedHash
 }
 
-// func (s Service) Print(){
-// 	s.repository.Print()
-// }
+func (s Service) Print(){
+	s.repository.Print()
+}

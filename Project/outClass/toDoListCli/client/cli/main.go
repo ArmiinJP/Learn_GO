@@ -445,6 +445,8 @@ func socketLayer(data []byte, target string) ([]byte, error) {
 		return []byte{}, fmt.Errorf("error Sending data to Server: %s", wErr.Error())
 	}
 
+	fmt.Println(conn.LocalAddr())
+
 	var res = make([]byte, 1024)
 	numberOfByte, rErr := conn.Read(res)
 	if rErr != nil {

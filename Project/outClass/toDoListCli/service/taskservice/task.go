@@ -18,7 +18,7 @@ type taskRepo interface {
 	NewTaskIDGenerateForUser(userID int) (int, error) 
 
 	// for testing server
-	//Print()
+	Print()
 }
 
 type Service struct {
@@ -172,6 +172,6 @@ func (s Service) ChangeStatusRequest(request requestParam.ValuesChangeStatusTask
 	return responseParam.Response{StatusCode: 200, Message: "Change Status Task Successfully", Data: []byte{}}, nil
 }
 
-// func (s Service) Print(){
-// 	s.repository.Print()
-// }
+func (s Service) Print(){
+	s.repository.Print()
+}
