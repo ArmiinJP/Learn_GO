@@ -5,40 +5,37 @@ import (
 )
 
 type ValuesCreateTask struct {
-	Title		string
-	DueDate		string
-	CategoryID	int	
-	UserID		int
+	Title      string
+	DueDate    string
+	CategoryID int
+	UserID     int
 }
 
 type ValuesListTask struct {
-	UserID		int	
+	UserID int
 }
 
-type ValueslistTodayTask struct{
-	UserID		int	
-	Date		time.Time
+type ValueslistTodayTask struct {
+	UserID int
+	Date   time.Time
 }
 
-
-type ValuesListSpecificDayTask struct{
-	UserID		int	
-	Date		time.Time
+type ValuesListSpecificDayTask struct {
+	UserID int
+	Date   time.Time
 }
 
-
-type ValuesEditTask struct{
-	ID         int
+type ValuesEditTask struct {
+	TaskID     int
 	Title      string
 	DueDate    string
-	CategoryID   int
+	CategoryID int
 	IsComplete bool
 	UserID     int
 }
 
-
-type ValuesChangeStatusTask struct{
-	ID         int
+type ValuesChangeStatusTask struct {
+	TaskID     int
 	IsComplete bool
 	UserID     int
 }

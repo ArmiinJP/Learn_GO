@@ -1,13 +1,13 @@
 package filestorage
 
 import (
-	"os"
-	"strings"
 	"bufio"
-	"fmt"
-	"strconv"
-	"encoding/xml"
 	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
 
 	"todolist/entity"
 )
@@ -51,7 +51,7 @@ func checkFormatFile(serializationMode string) string {
 	return formatName
 }
 
-func (f FileStore) Save(newUser entity.User) error{
+func (f FileStore) Save(newUser entity.User) error {
 	//Choose format to save into file
 	var data []byte
 
@@ -62,7 +62,7 @@ func (f FileStore) Save(newUser entity.User) error{
 			return fmt.Errorf("could not convert data to json")
 		} else {
 			data = d
-		}	
+		}
 
 	case "xml":
 		if d, err := xml.Marshal(&newUser); err != nil {
@@ -73,28 +73,27 @@ func (f FileStore) Save(newUser entity.User) error{
 		}
 
 	case "csv":
-		data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.ID, newUser.Password))
-	
+		data = []byte(fmt.Sprintf("%s,%d,%s", newUser.Email, newUser.UserID, newUser.Password))
+
 	case "txt":
-		data = []byte(fmt.Sprintf("id: %d, email: %s, password: %s", newUser.ID, newUser.Email, newUser.Password))
-	
+		data = []byte(fmt.Sprintf("id: %d, email: %s, password: %s", newUser.UserID, newUser.Email, newUser.Password))
+
 	default:
 
 		return fmt.Errorf("format to save file is invalid")
 	}
 
 	//write data to the file
-    file, err := os.OpenFile(f.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-    
-    if err != nil {
-    	
+	file, err := os.OpenFile(f.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+
 		return fmt.Errorf("could not open dataset")
 	}
 
 	defer file.Close()
-	 
 
-	if _, err2 := file.WriteString(string(data)+"\n"); err2 != nil {
+	if _, err2 := file.WriteString(string(data) + "\n"); err2 != nil {
 
 		return fmt.Errorf("could not write data to dataset")
 	}
@@ -104,50 +103,50 @@ func (f FileStore) Save(newUser entity.User) error{
 
 func (f FileStore) Load() ([]entity.User, error) {
 	var users []entity.User
-	    
+
 	// open file
-    file, err := os.Open(f.path)
-    if err != nil {
-        return []entity.User{}, fmt.Errorf("error when open Dataset")
-    }
-    defer file.Close()
+	file, err := os.Open(f.path)
+	if err != nil {
+		return []entity.User{}, fmt.Errorf("error when open Dataset")
+	}
+	defer file.Close()
 
 	var data string
 	var fetchUser entity.User
-    scanner := bufio.NewScanner(file)
-    
+	scanner := bufio.NewScanner(file)
+
 	for scanner.Scan() {
 		var err error
 		// delete "\n" of end of each line
-        data = strings.Split(scanner.Text(), "\n")[0]
+		data = strings.Split(scanner.Text(), "\n")[0]
 
 		switch f.serializationMode {
-		case "json": 
+		case "json":
 			err = json.Unmarshal([]byte(data), &fetchUser)
-			if err != nil{
+			if err != nil {
 
 				return []entity.User{}, fmt.Errorf("datas in dataset is wrong format for JSON")
 			}
-		
+
 		case "xml":
 			err = xml.Unmarshal([]byte(data), &fetchUser)
-			if err != nil{
+			if err != nil {
 
 				return []entity.User{}, fmt.Errorf("datas in dataset is wrong format for JSON")
-			}			
-		
+			}
+
 		case "csv":
 			fetchUser.Email = strings.Split(data, ",")[0]
-			fetchUser.ID, err = strconv.Atoi(strings.Split(data, ",")[1])
-			if err != nil{
+			fetchUser.UserID, err = strconv.Atoi(strings.Split(data, ",")[1])
+			if err != nil {
 
 				return []entity.User{}, fmt.Errorf("datas in dataset is wrong format for CSV")
 			}
 			fetchUser.Password = strings.Split(data, ",")[2]
-		
+
 		case "txt":
-			fetchUser.ID, err = strconv.Atoi(strings.Split(strings.Split(data, ",")[0], ": ")[1])
-			if err != nil{
+			fetchUser.UserID, err = strconv.Atoi(strings.Split(strings.Split(data, ",")[0], ": ")[1])
+			if err != nil {
 				return []entity.User{}, fmt.Errorf("datas in dataset is wrong format for TXT")
 
 			}
@@ -156,11 +155,11 @@ func (f FileStore) Load() ([]entity.User, error) {
 		}
 
 		users = append(users, fetchUser)
-    }
+	}
 
 	return users, nil
 }
 
-func (f FileStore) ReturnSerialandPath() (string, string){
+func (f FileStore) ReturnSerialandPath() (string, string) {
 	return f.serializationMode, f.path
 }

@@ -255,7 +255,7 @@ https://go101.org/article/type-system-overview.html#:~:text=Built%2Din%20numeric
 
 ÷÷÷÷÷÷÷÷÷ خب builtin type ها که مشخص هستند همون string , int اینا هستند. یه سری تایپ ترکیبی هم داریم، که خودت میسازیشون. توجه شود که struct ها که ما تعریف میکنیم یک سری تایپ هستند مثل int , string که میتونیم ازشون variable , نمونه بسازیم. در واقع یک نمونه custom type .
 ÷÷÷÷÷÷÷÷÷ این error از جنس interface هست. و interface از جنس custom type هست. درصورتی که مثلا string از جنس  builtin type هست. 
-
+	
 ÷÷÷÷÷÷÷÷÷ بحث تبدیل تایپ‌های مهم به همدیگه:
 برای تبدیل int به string میشه از  fmt.Sprint استفاده کرد، کافیه var یا کانست را با هر تایپی بدی بهش و بهت string اون را برگردونه، از اون طرف strconv.Itoa هم هست که صرفا برای تبدیل تایپ int به string کاربرد داره.
 string_type := fmt.Sprint(every_type)
